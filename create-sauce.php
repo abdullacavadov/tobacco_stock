@@ -2,6 +2,54 @@
 <?php require_once('inc/db.php'); ?>
 
 
+<?php
+$stmt = $pdo->query("
+    SELECT
+        r.id,
+        r.name,
+        r.created_at,
+        r.type,
+        i.raw_material_name,
+        i.percentage
+    FROM sauce_recipes r
+    LEFT JOIN sauce_recipe_items i
+        ON i.recipe_id = r.id
+    ORDER BY r.name, i.raw_material_name
+");
+
+$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+$recipes = [];
+
+foreach ($rows as $row) {
+
+    $recipeId = $row['id'];
+
+    if (!isset($recipes[$recipeId])) {
+
+        $recipes[$recipeId] = [
+            'id' => $row['id'],
+            'name' => $row['name'],
+            'type' => $row['type'],
+            'created_at' => $row['created_at'],
+            'items' => []
+        ];
+
+    }
+
+    if (!empty($row['raw_material_name'])) {
+
+        $recipes[$recipeId]['items'][] = [
+            'raw_material_name' => $row['raw_material_name'],
+            'percentage' => $row['percentage']
+        ];
+
+    }
+
+}
+?>
+
 <!DOCTYPE html>
 <html lang="az">
 
@@ -47,6 +95,31 @@
 
 
                                 <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-floating mb-3">
+                                            <select class="form-control" id="recipe_id" name="recipe_id">
+
+                                                <?php foreach ($recipes as $recipe): ?>
+
+                                                    <option value="<?= htmlspecialchars($recipe['id']) ?>">
+                                                        <?= htmlspecialchars($recipe['name']) ?> - <strong class="text-uppercase"><?= $recipe['type'] ?></strong>
+                                                        (<?php foreach ($recipe['items'] as $item): ?>
+
+                                                            <span>
+                                                                <?= htmlspecialchars($item['raw_material_name']) . ' - ' . number_format($item['percentage'], 2) . '%' ?>
+
+                                                            </span>
+
+                                                        <?php endforeach; ?>)
+
+                                                    </option>
+
+                                                <?php endforeach; ?>
+                                            </select>
+                                            <label for="recipe_id">Sous resepti</label>
+                                        </div>
+                                    </div>
+
                                     <div class="col-md-6">
                                         <div class="form-floating">
                                             <select class="form-control" id="type" name="type">
@@ -171,6 +244,7 @@
 
             let type = document.getElementById('type').value;
             let stock = document.getElementById('stock').value;
+            let recipeId = document.getElementById('recipe_id').value;
 
             let recipeStock = parseFloat(stock);
 
@@ -186,6 +260,7 @@
             let formData = new FormData();
             formData.append('type', type);
             formData.append('stock', stock);
+            formData.append('recipe_id', recipeId);
 
             fetch('./ajax/calculate_sauce.php', {
                 method: 'POST',

@@ -5,7 +5,7 @@ require '../inc/db.php';
 header('Content-Type: application/json; charset=utf-8');
 
 try {
-
+    $recipeId = (int) ($_POST['recipe_id'] ?? 0);
     $type = trim($_POST['type'] ?? '');
     $kg = (float) ($_POST['stock'] ?? 0);
 
@@ -13,29 +13,45 @@ try {
         throw new Exception('Yanlış miqdar');
     }
 
-    $recipes = [
-
-        'premium' => [
-            'Tütün' => 0.1281,
-            'Qliserin' => 0.6151,
-            'Fruktoza' => 0.2563,
-            'Rəng' => 0.0005
-        ],
-
-        'strong' => [
-            'Tütün' => 0.1538,
-            'Qliserin' => 0.6154,
-            'Fruktoza' => 0.1538,
-            'Bəhməz' => 0.0769
-        ]
-
-    ];
-
-    if (!isset($recipes[$type])) {
+    if (!in_array($type, ['premium', 'strong'])) {
         throw new Exception('Yanlış sous növü');
     }
 
-    $recipe = $recipes[$type];
+
+    $pdo->beginTransaction();
+
+    $stmt = $pdo->prepare("
+    SELECT
+        sr.id,
+        sr.name,
+        sr.type,
+        sri.raw_material_name,
+        sri.percentage
+    FROM sauce_recipes sr
+    INNER JOIN sauce_recipe_items sri
+        ON sri.recipe_id = sr.id
+    WHERE sr.id = ?
+");
+
+    $stmt->execute([$recipeId]);
+
+    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    if (!$rows) {
+        throw new Exception('Resept tapılmadı');
+    }
+
+    if ($rows[0]['type'] !== $type) {
+        throw new Exception('Bu resept seçilən sous növünə aid deyil');
+    }
+
+    $type = $rows[0]['type'];
+
+    $recipe = [];
+
+    foreach ($rows as $row) {
+        $recipe[$row['raw_material_name']] = $row['percentage'] / 100;
+    }
 
     // Xammal hesablanacaq baza miqdarı
     $recipeKg = $kg;
