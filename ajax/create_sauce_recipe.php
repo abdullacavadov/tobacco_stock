@@ -10,6 +10,7 @@ try {
     $type = trim($_POST['type'] ?? '');
     $raw_name = $_POST['raw_name'] ?? [];
     $percentages = $_POST['percentage'] ?? [];
+    $loss = (float) ($_POST['loss'] ?? 0);
 
 
 
@@ -23,6 +24,10 @@ try {
 
     if (empty($raw_name)) {
         throw new Exception('Ən azı 1 xammal seçilməlidir');
+    }
+
+    if ($type === 'strong' && empty($loss)) {
+        throw new Exception('İstehsal itkisi qeyd edilməlidir. (Minimum 0, Maksimum 100)');
     }
 
 
@@ -66,10 +71,12 @@ try {
         INSERT INTO sauce_recipes
         (
             name,
-            type
+            type,
+            loss
         )
         VALUES
         (
+            ?,
             ?,
             ?
         )
@@ -77,7 +84,8 @@ try {
 
     $stmt->execute([
         $name,
-        $type
+        $type,
+        $loss
     ]);
 
     $recipeId = $pdo->lastInsertId();

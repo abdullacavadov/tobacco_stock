@@ -9,6 +9,7 @@ $stmt = $pdo->query("
         r.name,
         r.created_at,
         r.type,
+        r.loss,
         i.raw_material_name,
         i.percentage
     FROM sauce_recipes r
@@ -32,6 +33,7 @@ foreach ($rows as $row) {
             'id' => $row['id'],
             'name' => $row['name'],
             'type' => $row['type'],
+            'loss' => $row['loss'],
             'created_at' => $row['created_at'],
             'items' => []
         ];
@@ -110,8 +112,11 @@ foreach ($rows as $row) {
 
                                                             </span>
 
-                                                        <?php endforeach; ?>)
-
+                                                        <?php endforeach; ?>) 
+                                                        
+                                                        <?php if ($recipe['loss'] > 0): ?>
+                                                            -<?= number_format($recipe['loss'], 2) ?> % <span class="text-danger"> istehsal itkisi </span>
+                                                            <?php endif; ?>
                                                     </option>
 
                                                 <?php endforeach; ?>
@@ -138,7 +143,6 @@ foreach ($rows as $row) {
                                             <label for="stock">Həcm (kq)</label>
                                         </div>
                                     </div>
-
 
                                 </div>
 
@@ -248,9 +252,7 @@ foreach ($rows as $row) {
 
             let recipeStock = parseFloat(stock);
 
-            if (type === 'strong') {
-                recipeStock = recipeStock / 0.85;
-            }
+     
 
             if (!stock || stock <= 0) {
                 document.getElementById('recipePreview').innerHTML = '';
@@ -261,6 +263,7 @@ foreach ($rows as $row) {
             formData.append('type', type);
             formData.append('stock', stock);
             formData.append('recipe_id', recipeId);
+
 
             fetch('./ajax/calculate_sauce.php', {
                 method: 'POST',
@@ -276,6 +279,8 @@ foreach ($rows as $row) {
 
                         return;
                     }
+
+                    recipeStock = recipeStock / (1 - data.loss / 100);
 
                     let html = `
                         <table class="table table-bordered">

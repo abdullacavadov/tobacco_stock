@@ -29,6 +29,7 @@ try {
         sr.id,
         sr.name,
         sr.type,
+        sr.loss,
         sri.raw_material_name,
         sri.percentage
     FROM sauce_recipes sr
@@ -50,6 +51,7 @@ try {
     }
 
     $type = $rows[0]['type'];
+    $loss = $rows[0]['loss'];
 
     $recipe = [];
 
@@ -60,10 +62,9 @@ try {
     // Material hesablanacaq baza miqdarı
     $recipeKg = $kg;
 
-    if ($type === 'strong') {
-        // Strong sousunda 15% itki var
-        $recipeKg = $kg / 0.85;
-    }
+    // sousda $loss % itki varsa
+    $recipeKg = $kg / (1 - $loss / 100);
+
 
     $cost = 0;
 

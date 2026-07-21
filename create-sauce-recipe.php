@@ -52,12 +52,19 @@
                                         <input type="text" class="form-control" name="name">
                                     </div>
 
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <label class="form-label">Sous növü</label>
                                         <select class="form-control" name="type">
                                             <option value="premium">Qırmızı</option>
                                             <option value="strong">Qara</option>
                                         </select>
+                                    </div>
+
+
+                                    <div class="col-md-2">
+                                        <label class="form-label">İstehsal itkisi (%)</label>
+                                        <input type="number" class="form-control" name="loss" step="0.0001"
+                                            min="0" value="0">
                                     </div>
 
                                 </div>

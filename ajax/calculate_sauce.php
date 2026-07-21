@@ -25,6 +25,7 @@ try {
         sr.id,
         sr.name,
         sr.type,
+        sr.loss,
         sri.raw_material_name,
         sri.percentage
     FROM sauce_recipes sr
@@ -46,7 +47,7 @@ try {
     }
 
     $type = $rows[0]['type'];
-
+    $loss = $rows[0]['loss'];
     $recipe = [];
 
     foreach ($rows as $row) {
@@ -56,10 +57,9 @@ try {
     // Xammal hesablanacaq baza miqdarı
     $recipeKg = $kg;
 
-    if ($type === 'strong') {
-        // 15% istehsal itkisi
-        $recipeKg = $kg / 0.85;
-    }
+    // $loss % istehsal itkisi varsa
+    $recipeKg = $kg / (1 - $loss / 100);
+
 
     $rows = [];
     $totalCost = 0;
@@ -138,7 +138,7 @@ try {
         'success' => true,
         'recipe_kg' => round($recipeKg, 3),
         'finished_kg' => round($kg, 3),
-        'loss' => ($type === 'strong') ? 15 : 0,
+        'loss' => $loss,
         'rows' => $rows,
         'total_cost' => round($totalCost, 2)
     ], JSON_UNESCAPED_UNICODE);
