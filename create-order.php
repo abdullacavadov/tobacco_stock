@@ -54,7 +54,6 @@
                                             <select class="form-control" id="name" name="name">
 
                                                 <?php
-
                                                 $stmt = $pdo->query("
                                                     SELECT
                                                         *
@@ -62,10 +61,7 @@
                                                     WHERE stock > 0 
                                                     ORDER BY production_date DESC
                                                 ");
-
                                                 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-
                                                 ?>
 
                                                 <?php foreach ($rows as $row): ?>
@@ -108,7 +104,7 @@
 
                                     <div class="col-md-6 mb-3">
                                         <div class="form-floating">
-                                            <input class="form-control" id="price" name="price" type="number" step="0.01"
+                                            <input class="form-control" id="price" name="price" type="number" step="0.0001"
                                                 placeholder="10" />
                                             <label for="price">Vahidin satış qiyməti (AZN)</label>
                                         </div>

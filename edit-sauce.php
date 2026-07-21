@@ -84,7 +84,7 @@ $sauce_price = $sauce['price'];
                                     <div class="col-md-4">
                                         <div class="form-floating">
                                             <input class="form-control" id="stock" name="stock" type="number"
-                                                step="0.01" placeholder="100 kq" value="<?= $sauce_stock; ?>" />
+                                                step="0.0001" min="0.0001" placeholder="100 kq" value="<?= $sauce_stock; ?>" />
                                             <label for="stock">Həcm (kq)</label>
                                         </div>
                                     </div>
@@ -93,7 +93,7 @@ $sauce_price = $sauce['price'];
                                     <div class="col-md-4">
                                         <div class="form-floating">
                                             <input class="form-control" id="price" name="price" type="number"
-                                                step="0.01" placeholder="100 ₼" value="<?= $sauce_price; ?>" />
+                                                step="0.0001" min="0.0001" placeholder="100 ₼" value="<?= $sauce_price; ?>" />
                                             <label for="price">Ümumi həcmin qiyməti (AZN)</label>
                                         </div>
                                     </div>

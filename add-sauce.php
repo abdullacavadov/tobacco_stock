@@ -61,7 +61,7 @@
                                     <div class="col-md-4 mb-2">
                                         <div class="form-floating">
                                             <input class="form-control" id="stock" name="stock" type="number"
-                                                step="0.01" placeholder="100 kq" />
+                                                step="0.0001" min="0.0001" placeholder="100 kq" />
                                             <label for="stock">Həcm (kq)</label>
                                         </div>
                                     </div>
@@ -69,16 +69,12 @@
                                     <div class="col-md-4 mb-2">
                                         <div class="form-floating">
                                             <input class="form-control" id="price" name="price" type="number"
-                                                step="0.01" placeholder="100 ₼" />
+                                                step="0.0001" min="0.0001" placeholder="100 ₼" />
                                             <label for="price">Ümumi alış qiyməti</label>
                                         </div>
                                     </div>
 
-
                                 </div>
-
-
-
 
 
                                 <div class="mt-4 mb-0">

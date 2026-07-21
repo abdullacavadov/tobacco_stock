@@ -161,7 +161,7 @@ foreach ($rows as $row) {
                                     <div class="col-md-4">
                                         <div class="form-floating">
                                             <input class="form-control" id="qty" name="qty" type="number"
-                                                step="0.01" placeholder="100 kq" value="<?= htmlspecialchars($sauceQty) ?>"/>
+                                                step="0.0001" min="0.0001" placeholder="100 kq" value="<?= htmlspecialchars($sauceQty) ?>"/>
                                             <label for="qty">Həcm (kq)</label>
                                         </div>
                                     </div>
@@ -170,7 +170,7 @@ foreach ($rows as $row) {
                                     <div class="col-md-4">
                                         <div class="form-floating">
                                             <input class="form-control" id="cost" name="cost" type="number"
-                                                step="0.01" value="<?= number_format($sauceCost, 2, '.', '') ?>"/>
+                                                step="0.0001" value="<?= number_format($sauceCost, 4, '.', '') ?>"/>
                                             <label for="cost">Ümumi həcmin qiyməti (AZN)</label>
                                         </div>
                                     </div>

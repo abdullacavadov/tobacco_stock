@@ -119,7 +119,7 @@
                                     <div class="col-6">
                                         <div class="form-floating">
                                             <input class="form-control" id="stock" name="stock" type="number"
-                                                step="0.01" placeholder="100 kq" />
+                                                step="0.0001" min="0.0001" placeholder="100 kq" />
                                             <label for="stock">Həcm (kq / əd)</label>
                                         </div>
                                     </div>
@@ -127,7 +127,7 @@
                                     <div class="col-6">
                                         <div class="form-floating mb-3">
                                             <input class="form-control" id="price" type="number" name="price"
-                                                step="0.01" placeholder="name@example.com" />
+                                                step="0.0001" min="0.0001" placeholder="100 ₼" />
                                             <label for="price">Qiymət (AZN)</label>
                                         </div>
                                     </div>

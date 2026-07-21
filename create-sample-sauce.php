@@ -253,7 +253,7 @@ $stocks['product'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             </div> 
                             
                             <div class="col-md-2"> 
-                                <input class="form-control" type="number" step="0.01" min="0.01" name="qty[]"> 
+                                <input class="form-control" type="number" step="0.0001" min="0.0001" name="qty[]"> 
                             </div> 
 
                             <div class="col-md-2"> 

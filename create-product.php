@@ -91,7 +91,6 @@
                                             <select class="form-control" id="package" name="package">
 
                                                 <?php
-
                                                 $stmt = $pdo->query("
                                                     SELECT *
                                                     FROM raw_materials
@@ -99,7 +98,6 @@
                                                     AND type = 'package'
                                                     ORDER BY name ASC
                                                 ");
-
                                                 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                 ?>
 
@@ -120,7 +118,6 @@
                                             <select class="form-control" id="label" name="label">
 
                                                 <?php
-
                                                 $stmt = $pdo->query("
                                                     SELECT *
                                                     FROM raw_materials
@@ -128,7 +125,6 @@
                                                     AND type = 'label'
                                                     ORDER BY name ASC
                                                 ");
-
                                                 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                                 ?>
 
@@ -147,7 +143,7 @@
                                     
                                     <div class="col-md-4 mb-3">
                                         <div class="form-floating">
-                                            <input class="form-control" id="package_weight" name="package_weight" type="number" step="0.01"
+                                            <input class="form-control" id="package_weight" name="package_weight" type="number" step="0.0001"
                                                 placeholder="100 kq" />
                                             <label for="package_weight">Qabın həcmi (qram)</label>
                                         </div>
@@ -167,7 +163,7 @@
 
                                     <div class="col-md-4 mb-3">
                                         <div class="form-floating">
-                                            <input class="form-control" id="stock" name="stock" type="number" step="0.01"
+                                            <input class="form-control" id="stock" name="stock" type="number" step="0.0001"
                                                 placeholder="100 kq" />
                                             <label for="stock">Say (əd)</label>
                                         </div>

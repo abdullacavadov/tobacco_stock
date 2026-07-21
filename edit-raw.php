@@ -102,7 +102,7 @@ $price = $raw_material['price'];
                                     <div class="col-6">
                                         <div class="form-floating">
                                             <input class="form-control" id="stock" name="stock" type="number"
-                                                step="0.01" placeholder="100 kq" value="<?= $stock; ?>" />
+                                                step="0.0001" min="0.0001" placeholder="100 kq" value="<?= $stock; ?>" />
                                             <label for="stock">Həcm (kq / əd)</label>
                                         </div>
                                     </div>
@@ -110,7 +110,7 @@ $price = $raw_material['price'];
                                     <div class="col-6">
                                         <div class="form-floating mb-3">
                                             <input class="form-control" id="price" type="number" name="price"
-                                                step="0.01"  value="<?= $price; ?>" />
+                                                step="0.0001" min="0.0001" value="<?= $price; ?>" />
                                             <label for="price">Ümumi həcmin qiyməti (AZN)</label>
                                         </div>
                                     </div>

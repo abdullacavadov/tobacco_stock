@@ -239,7 +239,7 @@
 
             <input
                 type="number"
-                step="0.01"
+                step="0.0001"
                 min="0"
                 class="form-control percentage-input"
                 name="percentage[]"

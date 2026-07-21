@@ -134,7 +134,7 @@ foreach ($rows as $row) {
                                     <div class="col-md-6">
                                         <div class="form-floating">
                                             <input class="form-control" id="stock" name="stock" type="number"
-                                                step="0.01" placeholder="100 kq" />
+                                                step="0.0001" min="0.0001" placeholder="100 kq" />
                                             <label for="stock">Həcm (kq)</label>
                                         </div>
                                     </div>
