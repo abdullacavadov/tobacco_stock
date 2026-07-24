@@ -9,6 +9,7 @@ $stmt = $pdo->query("
         r.name,
         r.created_at,
         r.type,
+        r.loss,
         i.raw_material_name,
         i.percentage
     FROM sauce_recipes r
@@ -32,6 +33,7 @@ foreach ($rows as $row) {
             'id' => $row['id'],
             'name' => $row['name'],
             'type' => $row['type'],
+            'loss' => $row['loss'],
             'created_at' => $row['created_at'],
             'items' => []
         ];
@@ -125,7 +127,7 @@ foreach ($rows as $row) {
                                                 <span class="d-flex gap-5">
 
                                                     <b style="width: 400px">
-                                                        <?= htmlspecialchars($recipe['name']) ?>
+                                                        <?= htmlspecialchars($recipe['name'] . ' (itki: ' . number_format($recipe['loss'], 2) . '%)' ) ?>
                                                     </b>
 
 
