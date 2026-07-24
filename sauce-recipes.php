@@ -116,11 +116,23 @@ foreach ($rows as $row) {
                                                 }
                                             </style>
 
-                                            <button class="accordion-button collapsed text-light <?= $badgeClass ?>"
-                                                type="button" data-bs-toggle="collapse"
-                                                data-bs-target="#recipe<?= $recipe['id'] ?>">
+                                            <button class="accordion-button collapsed text-light <?= $badgeClass ?> 
+                                                       d-flex justify-content-between align-items-center" type="button"
+                                                data-bs-toggle="collapse" data-bs-target="#recipe<?= $recipe['id'] ?>">
 
-                                                <?= htmlspecialchars($recipe['name']) ?>
+
+
+                                                <span class="d-flex gap-5">
+
+                                                    <b style="width: 400px">
+                                                        <?= htmlspecialchars($recipe['name']) ?>
+                                                    </b>
+
+
+
+                                                </span>
+
+
 
                                             </button>
 
@@ -130,8 +142,24 @@ foreach ($rows as $row) {
                                             data-bs-parent="#recipesAccordion">
 
                                             <div class="accordion-body">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    Yaradılıb: <?= date('d.m.Y H:i', strtotime($recipe['created_at'])); ?>
 
-                                                Yaradılıb: <?= date('d.m.Y H:i', strtotime($recipe['created_at'])); ?>
+                                                    <span class="d-flex gap-3">
+                                                        <a href="sauce-recipe-edit.php?id=<?= $recipe['id'] ?>"
+                                                            class=" text-primary ms-3 text-decoration-none">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+
+                                                        <a href="ajax/delete_sauce_recipe.php?srid=<?= $recipe['id']; ?>"
+                                                            class="text-danger ms-2 text-decoration-none delete-btn"
+                                                            type="button">
+                                                            <i class="fas fa-trash"></i>
+                                                        </a>
+                                                    </span>
+                                                </div>
+
+
                                                 <hr>
 
                                                 <table class="table table-sm table-bordered align-middle w-50">
@@ -189,6 +217,33 @@ foreach ($rows as $row) {
     <script src="assets/js/scripts.js"></script>
     <script src="assets/js/simple-datatables.min.js" crossorigin="anonymous"></script>
     <script src="assets/js/datatables-simple-demo.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        document.addEventListener("click", function (e) {
+            const btn = e.target.closest(".delete-btn");
+            if (!btn) return;
+
+            e.preventDefault();
+            const deleteUrl = btn.getAttribute("href");
+
+            Swal.fire({
+                title: "Silmək istədiyinizə əminsiniz?",
+                text: "Bu əməliyyat geri qaytarıla bilməz!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Bəli, sil",
+                cancelButtonText: "Ləğv et"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = deleteUrl;
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>

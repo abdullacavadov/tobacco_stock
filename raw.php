@@ -195,15 +195,6 @@ $products = $pdo
 
                                     <?php endforeach; ?>
                                 </tbody>
-
-                                <tfoot>
-                                    <tr>
-                                        <th>Məhsul</th>
-                                        <th>Həcm</th>
-                                        <th>Qiymət</th>
-                                        <th>Gəliş</th>
-                                    </tr>
-                                </tfoot>
                             </table>
                         </div>
                     </div>
