@@ -94,7 +94,7 @@
 
 
                                 <div class="row mb-3">
-                                    <div class="col-12">
+                                    <div class="col-6">
 
                                         <div class="form-floating mb-3 mb-md-0">
                                             <select class="form-control" id="type" name="type">
@@ -109,6 +109,13 @@
                                     </div>
 
 
+                                    <div class="col-6">
+                                        <div class="form-floating">
+                                            <input class="form-control" id="supplier" name="supplier" type="text"
+                                                placeholder="Məs: ABC Qab" />
+                                            <label for="supplier">Təchizatçı</label>
+                                        </div>
+                                    </div>
 
                                 </div>
 
@@ -129,6 +136,15 @@
                                             <input class="form-control" id="price" type="number" name="price"
                                                 step="0.0001" min="0.0001" placeholder="100 ₼" />
                                             <label for="price">Qiymət (AZN)</label>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="col-12">
+                                        <div class="form-floating mb-3">
+                                            <textarea class="form-control" id="description" name="description"
+                                                placeholder="Qeyd" rows="5"></textarea>
+                                            <label for="description">Qeyd</label>
                                         </div>
                                     </div>
                                 </div>

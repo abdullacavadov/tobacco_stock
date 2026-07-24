@@ -10,6 +10,8 @@ if ($_POST['custom_name'] != '') {
 $stock = (float) $_POST['stock'];
 $price = (float) $_POST['price'];
 $type = trim($_POST['type']);
+$supplier = trim($_POST['supplier']);
+$description = trim($_POST['description']);
 
 if (empty($name)) {
     exit('Xammal seçilməyib.');
@@ -17,6 +19,10 @@ if (empty($name)) {
 
 if (empty($type)) {
     exit('Məhsulun növü seçilməyib.');
+}
+
+if (empty($supplier)) {
+    exit('Təchizatçı qeyd edilməyib.');
 }
 
 if (!isset($_POST['stock']) || $_POST['stock'] === '') {
@@ -28,8 +34,8 @@ if (!isset($_POST['price']) || $_POST['price'] === '') {
 }
 
 
-$statement = $pdo->prepare("INSERT INTO raw_materials (name, type, stock, price) VALUES (?,?,?,?)");
-$statement->execute([$name, $type, $stock, $price]);
+$statement = $pdo->prepare("INSERT INTO raw_materials (name, type, stock, price, supplier, description) VALUES (?,?,?,?,?,?)");
+$statement->execute([$name, $type, $stock, $price, $supplier, $description]);
 
 
 echo 'success';
