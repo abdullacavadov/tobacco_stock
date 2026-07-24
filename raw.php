@@ -22,6 +22,30 @@ $products = $pdo
 
 <head>
     <?php require_once('inc/head.php'); ?>
+
+    <style>
+        .info-badge {
+            width: 30px;
+            height: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: #eef4ff;
+            color: #0d6efd;
+            cursor: pointer;
+            transition: .25s;
+            border: 1px dotted #6e6e6e;
+            margin-left: 5px;
+        }
+
+        .info-badge:hover {
+            background: #0d6efd;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 18px rgba(13, 110, 253, .3);
+        }
+    </style>
 </head>
 
 <body class="sb-nav-fixed">
@@ -82,6 +106,7 @@ $products = $pdo
                                 <thead>
                                     <tr>
                                         <th>Məhsul</th>
+                                        <th>Təchizatçı</th>
                                         <th>Növü</th>
                                         <th>Həcm</th>
                                         <th>Qiymət (kq)</th>
@@ -115,7 +140,22 @@ $products = $pdo
                                         <tr>
 
                                             <td>
-                                                <?= $item['name'] ?>
+                                               
+                                                <span class="d-flex align-items-center">
+                                                     <?= $item['name'] ?>
+
+                                                    <button type="button"
+                                                        class="info-badge description-btn"
+                                                        data-bs-toggle="modal" data-bs-target="#descriptionModal"
+                                                        data-title="<?= htmlspecialchars($item['name'], ENT_QUOTES) ?>"
+                                                        data-description="<?= htmlspecialchars($item['description'], ENT_QUOTES) ?>">
+                                                        <i class="fas fa-circle-info"></i>
+                                                    </button>
+                                                </span>
+                                            </td>
+
+                                            <td>
+                                                <?= $item['supplier'] ?>
                                             </td>
 
                                             <td>
@@ -172,6 +212,29 @@ $products = $pdo
             <?php require_once('inc/footer.php'); ?>
         </div>
     </div>
+
+    <div class="modal fade" id="descriptionModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-circle-info me-2"></i>
+                        <span id="descriptionTitle"></span>
+                    </h5>
+
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal">
+                    </button>
+                </div>
+
+                <div class="modal-body">
+                    <p class="mb-0" id="descriptionText"></p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
         crossorigin="anonymous"></script>
     <script src="assets/js/scripts.js"></script>
@@ -202,6 +265,21 @@ $products = $pdo
                     window.location.href = deleteUrl;
                 }
             });
+        });
+    </script>
+
+    <script>
+        const modal = document.getElementById('descriptionModal');
+
+        modal.addEventListener('show.bs.modal', function (event) {
+
+            const button = event.relatedTarget;
+
+            document.getElementById('descriptionTitle').textContent =
+                button.dataset.title;
+
+            document.getElementById('descriptionText').innerHTML =
+                button.dataset.description.replace(/\n/g, "<br>");
         });
     </script>
 </body>
