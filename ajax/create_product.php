@@ -9,6 +9,7 @@ try {
     $name = trim($_POST['name'] ?? '');
     $package = trim($_POST['package'] ?? '');
     $label = trim($_POST['label'] ?? '');
+    $cover = trim($_POST['cover'] ?? '');
 
     $package_weight = (float) ($_POST['package_weight'] ?? 0) / 1000;
 
@@ -22,6 +23,7 @@ try {
 
     $packagePlan = [];
     $labelPlan = [];
+    $coverPlan = [];
     $saucePlan = [];
 
     if ($name == '') {
@@ -30,10 +32,6 @@ try {
 
     if ($package == '') {
         throw new Exception('Qab seçilməyib');
-    }
-
-    if ($label == '') {
-        throw new Exception('Etiket seçilməyib');
     }
 
     if (!in_array($type, ['premium', 'strong'])) {
@@ -143,98 +141,189 @@ try {
 |--------------------------------------------------------------------------
 */
 
-    $stmt = $pdo->prepare("
-    SELECT
-        id,
-        stock,
-        price
-    FROM raw_materials
-    WHERE
-        name = ?
-        AND type = 'label'
-        AND stock > 0
-    ORDER BY in_stock ASC, id ASC
-    FOR UPDATE
-");
+    if ($label !== '') {
 
-    $stmt->execute([
-        $label
-    ]);
+        $stmt = $pdo->prepare("
+            SELECT
+                id,
+                stock,
+                price
+            FROM raw_materials
+            WHERE
+                name = ?
+                AND type = 'label'
+                AND stock > 0
+            ORDER BY in_stock ASC, id ASC
+            FOR UPDATE
+        ");
 
-    $labels = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $stmt->execute([
+            $label
+        ]);
 
-    if (!$labels) {
-        throw new Exception('Etiket stokda yoxdur');
-    }
+        $labels = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    $totalLabelStock = array_sum(
-        array_column($labels, 'stock')
-    );
-
-    if ($totalLabelStock < $stock) {
-
-        throw new Exception(
-            'Etiket çatmır. Lazımdır: ' .
-            $stock .
-            ' ədəd, Mövcuddur: ' .
-            $totalLabelStock .
-            ' ədəd'
-        );
-
-    }
-
-    $remainingLabel = $stock;
-
-    foreach ($labels as $batch) {
-
-        if ($remainingLabel <= 0) {
-            break;
+        if (!$labels) {
+            throw new Exception('Etiket stokda yoxdur');
         }
 
-        $used = min(
-            $batch['stock'],
-            $remainingLabel
+        $totalLabelStock = array_sum(
+            array_column($labels, 'stock')
         );
 
-        // 1 ədəd etiketin qiyməti
-        $unitPrice = $batch['price'];
+        if ($totalLabelStock < $stock) {
 
-        $usedCost = round(
-            $unitPrice * $used,
-            4
-        );
+            throw new Exception(
+                'Etiket çatmır. Lazımdır: ' .
+                $stock .
+                ' ədəd, Mövcuddur: ' .
+                $totalLabelStock .
+                ' ədəd'
+            );
 
-        $labelPlan[] = [
-            'id' => $batch['id'],
-            'used' => $used,
-            'used_cost' => $usedCost
-        ];
+        }
 
-        $cost += $usedCost;
+        $remainingLabel = $stock;
 
-        $remainingLabel -= $used;
+        foreach ($labels as $batch) {
+
+            if ($remainingLabel <= 0) {
+                break;
+            }
+
+            $used = min(
+                $batch['stock'],
+                $remainingLabel
+            );
+
+            // 1 ədəd etiketin qiyməti
+            $unitPrice = $batch['price'];
+
+            $usedCost = round(
+                $unitPrice * $used,
+                4
+            );
+
+            $labelPlan[] = [
+                'id' => $batch['id'],
+                'used' => $used,
+                'used_cost' => $usedCost
+            ];
+
+            $cost += $usedCost;
+
+            $remainingLabel -= $used;
+
+        }
 
     }
 
+
+
     /*
-|--------------------------------------------------------------------------
-| SAUCE WITH FLAVOUR FIFO
-|--------------------------------------------------------------------------
-*/
+    |--------------------------------------------------------------------------
+    | COVER FIFO
+    |--------------------------------------------------------------------------
+    */
+
+    if ($cover !== '') {
+
+        $stmt = $pdo->prepare("
+            SELECT
+                id,
+                stock,
+                price
+            FROM raw_materials
+            WHERE
+                name = ?
+                AND type = 'cover'
+                AND stock > 0
+            ORDER BY in_stock ASC, id ASC
+            FOR UPDATE
+        ");
+
+        $stmt->execute([
+            $cover
+        ]);
+
+        $covers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (!$covers) {
+            throw new Exception('Paket stokda yoxdur');
+        }
+
+        $totalCoverStock = array_sum(
+            array_column($covers, 'stock')
+        );
+
+        if ($totalCoverStock < $stock) {
+
+            throw new Exception(
+                'Paket çatmır. Lazımdır: ' .
+                $stock .
+                ' ədəd, Mövcuddur: ' .
+                $totalCoverStock .
+                ' ədəd'
+            );
+
+        }
+
+        $remainingCover = $stock;
+
+        foreach ($covers as $batch) {
+
+            if ($remainingCover <= 0) {
+                break;
+            }
+
+            $used = min(
+                $batch['stock'],
+                $remainingCover
+            );
+
+            // 1 ədəd paketin qiyməti
+            $unitPrice = $batch['price'];
+
+            $usedCost = round(
+                $unitPrice * $used,
+                4
+            );
+
+            $coverPlan[] = [
+                'id' => $batch['id'],
+                'used' => $used,
+                'used_cost' => $usedCost
+            ];
+
+            $cost += $usedCost;
+
+            $remainingCover -= $used;
+
+        }
+
+    }
+
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SAUCE WITH FLAVOUR FIFO
+    |--------------------------------------------------------------------------
+    */
 
     $stmt = $pdo->prepare("
-    SELECT
-        id,
-        qty,
-        cost
-    FROM sauce_with_flavour
-    WHERE
-        flavour_name = ?
-        AND sauce_type = ?
-        AND qty > 0
-    ORDER BY created_at ASC, id ASC
-    FOR UPDATE
-");
+        SELECT
+            id,
+            qty,
+            cost
+        FROM sauce_with_flavour
+        WHERE
+            flavour_name = ?
+            AND sauce_type = ?
+            AND qty > 0
+        ORDER BY created_at ASC, id ASC
+        FOR UPDATE
+    ");
 
     $stmt->execute([
         $name,
@@ -299,11 +388,11 @@ try {
 
 
     $updateMaterial = $pdo->prepare("
-    UPDATE raw_materials
-    SET
-        stock = stock - ?
-    WHERE id = ?
-");
+        UPDATE raw_materials
+        SET
+            stock = stock - ?
+        WHERE id = ?
+    ");
 
     foreach ($packagePlan as $row) {
 
@@ -315,23 +404,40 @@ try {
     }
 
 
-    foreach ($labelPlan as $row) {
+    if ($label !== '') {
 
-        $updateMaterial->execute([
-            $row['used'],
-            $row['id']
-        ]);
+        foreach ($labelPlan as $row) {
+
+            $updateMaterial->execute([
+                $row['used'],
+                $row['id']
+            ]);
+
+        }
+
+    }
+
+    if ($cover !== '') {
+
+        foreach ($coverPlan as $row) {
+
+            $updateMaterial->execute([
+                $row['used'],
+                $row['id']
+            ]);
+
+        }
 
     }
 
 
     $updateSauce = $pdo->prepare("
-    UPDATE sauce_with_flavour
-    SET
-        qty = qty - ?,
-        cost = cost - ?
-    WHERE id = ?
-");
+        UPDATE sauce_with_flavour
+        SET
+            qty = qty - ?,
+            cost = cost - ?
+        WHERE id = ?
+    ");
 
     foreach ($saucePlan as $row) {
 
@@ -350,25 +456,25 @@ try {
 
 
     $stmt = $pdo->prepare("
-    INSERT INTO products
-    (
-        name,
-        weight,
-        stock,
-        type,
-        price,
-        production_date
-    )
-    VALUES
-    (
-        ?,
-        ?,
-        ?,
-        ?,
-        ?,
-        ?
-    )
-");
+        INSERT INTO products
+        (
+            name,
+            weight,
+            stock,
+            type,
+            price,
+            production_date
+        )
+        VALUES
+        (
+            ?,
+            ?,
+            ?,
+            ?,
+            ?,
+            ?
+        )
+    ");
 
     $stmt->execute([
         $name,

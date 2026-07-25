@@ -86,7 +86,7 @@
                                     </div>
 
 
-                                    <div class="col-md-4 mb-3">
+                                    <div class="col-md-3 mb-3">
                                         <div class="form-floating">
                                             <select class="form-control" id="package" name="package">
 
@@ -113,9 +113,19 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-md-4 mb-3">
+                                    <div class="col-md-3 mb-3">
+                                        <div class="form-floating">
+                                            <input class="form-control" id="package_weight" name="package_weight"
+                                                type="number" step="0.0001" placeholder="100 kq" />
+                                            <label for="package_weight">Qabın həcmi (qram)</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-3 mb-3">
                                         <div class="form-floating">
                                             <select class="form-control" id="label" name="label">
+
+                                                <option value="">QABIN ÖZÜNÜNKÜ</option>
 
                                                 <?php
                                                 $stmt = $pdo->query("
@@ -140,14 +150,38 @@
                                         </div>
                                     </div>
 
-                                    
-                                    <div class="col-md-4 mb-3">
+
+                                    <div class="col-md-3 mb-3">
                                         <div class="form-floating">
-                                            <input class="form-control" id="package_weight" name="package_weight" type="number" step="0.0001"
-                                                placeholder="100 kq" />
-                                            <label for="package_weight">Qabın həcmi (qram)</label>
+                                            <select class="form-control" id="cover" name="cover">
+
+                                                <option value="">YOXDUR</option>
+
+                                                <?php
+                                                $stmt = $pdo->query("
+                                                    SELECT *
+                                                    FROM raw_materials
+                                                    WHERE stock > 0
+                                                    AND type = 'cover'
+                                                    ORDER BY name ASC
+                                                ");
+                                                $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                                                ?>
+
+                                                <?php foreach ($rows as $row): ?>
+
+                                                    <option value="<?= htmlspecialchars($row['name']) ?>">
+                                                        <?= htmlspecialchars($row['name']) ?>
+                                                    </option>
+
+                                                <?php endforeach; ?>
+                                            </select>
+                                            <label for="cover">Paket</label>
                                         </div>
                                     </div>
+
+
+
 
 
                                     <div class="col-md-4">
@@ -163,16 +197,16 @@
 
                                     <div class="col-md-4 mb-3">
                                         <div class="form-floating">
-                                            <input class="form-control" id="stock" name="stock" type="number" step="0.0001"
-                                                placeholder="100 kq" />
+                                            <input class="form-control" id="stock" name="stock" type="number"
+                                                step="0.0001" placeholder="100 kq" />
                                             <label for="stock">Say (əd)</label>
                                         </div>
                                     </div>
 
                                     <div class="col-md-4 mb-3">
                                         <div class="form-floating">
-                                            <input class="form-control" id="production_date" name="production_date" type="date"
-                                                placeholder="100 kq" />
+                                            <input class="form-control" id="production_date" name="production_date"
+                                                type="date" placeholder="100 kq" />
                                             <label for="production_date">İstehsal tarixi</label>
                                         </div>
                                     </div>
