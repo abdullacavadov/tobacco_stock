@@ -127,7 +127,10 @@ foreach ($rows as $row) {
                                                 <span class="d-flex gap-5">
 
                                                     <b style="width: 400px">
-                                                        <?= htmlspecialchars($recipe['name'] . ' (itki: ' . number_format($recipe['loss'], 2) . '%)' ) ?>
+                                                        <?= htmlspecialchars($recipe['name']); ?>
+                                                        <?php if($recipe['loss'] > 0){
+                                                            echo ' (<i class="fa-solid fa-bong"></i> itki: ' . number_format($recipe['loss'], 2) . '%)';
+                                                        }  ?>
                                                     </b>
 
 
@@ -148,7 +151,7 @@ foreach ($rows as $row) {
                                                     Yaradılıb: <?= date('d.m.Y H:i', strtotime($recipe['created_at'])); ?>
 
                                                     <span class="d-flex gap-3">
-                                                        <a href="sauce-recipe-edit.php?id=<?= $recipe['id'] ?>"
+                                                        <a href="edit-sauce-recipe.php?srid=<?= $recipe['id'] ?>"
                                                             class=" text-primary ms-3 text-decoration-none">
                                                             <i class="fas fa-edit"></i>
                                                         </a>
