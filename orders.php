@@ -3,14 +3,20 @@
 
 require 'inc/db.php';
 
+if (!isset($_GET['kind'])) {
+    $sql = "SELECT * FROM orders ORDER BY created_at DESC";
+} else {
+    $kind = $_GET['kind'];
+    $sql = "SELECT * FROM orders WHERE kind = '$kind' ORDER BY created_at DESC";
+}
+
 $orders = $pdo
-    ->query("
-SELECT *
-FROM orders
-ORDER BY created_at DESC
-")
+    ->query($sql)
     ->fetchAll();
 
+$totalCost = 0;
+$totalRevenue = 0;
+$totalProfit = 0;
 ?>
 
 <!DOCTYPE html>
@@ -48,17 +54,69 @@ ORDER BY created_at DESC
                             </span>
 
 
-                            <a class="btn btn-success" href="create-order.php">
-                                <i class="fas fa-plus"></i>
-                                Satış reallaşdır
-                            </a>
+                            <form action="orders.php" method="get" class="d-flex gap-1">
+
+                                <select class="form-control" name="kind" style="width: 160px">
+                                    <option disabled selected>-- Filter seç --</option>
+                                    <option value="raw">Xammal</option>
+                                    <option value="flavour">Aromalı sous</option>
+                                    <option value="sauce">Sous</option>
+                                    <option value="product">Hazır məhsul</option>
+                                </select>
+
+                                <input type="submit" class="btn btn-primary" value="Filtrlə">
+
+                                <?php if (isset($_GET['kind'])): ?>
+                                    <a href="orders.php" class="btn btn-secondary">Sıfırla</a>
+                                <?php endif; ?>
+
+                            </form>
+
+
+                            <div class="dropdown">
+                                <button class="btn btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                    <i class="fas fa-plus"></i>
+                                    Satış reallaşdır
+                                </button>
+
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="create-raw-order.php">
+                                            <i class="fa-solid fa-warehouse"></i>
+                                            Xammal
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item" href="create-sauce-order.php">
+                                            <i class="fa-solid fa-flask"></i>
+                                            Sous
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item" href="create-flavour-order.php">
+                                            <i class="fa-solid fa-spray-can-sparkles"></i>
+                                            Aromatlı sous
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item" href="create-order.php">
+                                            <i class="fa-solid fa-box-open"></i>
+                                            Qablaşdırılmış məhsul
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
                         </div>
                         <div class="card-body">
-                            <table id="datatablesSimple">
+                            <table id="datatablesSimple" class="table table-striped">
                                 <thead>
                                     <tr>
                                         <th>Məhsul</th>
-                                        <th>Say</th>
+                                        <th>Miqdar</th>
                                         <th>Maya</th>
                                         <th>Satış</th>
                                         <th>Yekun</th>
@@ -73,38 +131,79 @@ ORDER BY created_at DESC
                                         <?php
                                         if ($order['type'] == 'premium') {
                                             $type = 'PREMIUM';
-                                        } else {
+                                        } elseif ($order['type'] == 'strong') {
                                             $type = 'STRONG';
+                                        } else {
+                                            $type = '';
                                         }
+
+                                        $name = $order['name'];
+                                        ?>
+
+                                        <?php
+                                        if ($order['kind'] == 'raw') {
+                                            $kind = 'Xammal';
+                                        } elseif ($order['kind'] == 'sauce') {
+                                            $kind = 'Sous';
+                                        } elseif ($order['kind'] == 'flavour') {
+                                            $kind = 'Aromatlı sous';
+                                        } elseif ($order['kind'] == 'product') {
+                                            $kind = 'Hazır məhsul';
+                                        }
+                                        ?>
+
+                                        <?php
+                                        $revenue = (float) $order['sell_price'] * $order['qty'];
+                                        $profit = ((float) $order['sell_price'] - (float) $order['cost']) * $order['qty'];
+
+                                        $totalCost += (float) $order['cost'] * $order['qty']; // ümumi maya dəyəri
+                                        $totalRevenue += $revenue;
+                                        $totalProfit += $profit;
                                         ?>
 
                                         <tr>
 
-                                            <style>
-                                                table.dataTable tbody td.premium-cell {
-                                                    background: red !important;
-                                                    color: white !important;
-                                                    box-shadow: inset 0 0 0 9999px red !important;
-                                                }
-
-                                                table.dataTable tbody td.strong-cell {
-                                                    background: black !important;
-                                                    color: white !important;
-                                                    box-shadow: inset 0 0 0 9999px black !important;
-                                                }
-                                            </style>
 
                                             <td>
-                                                <?= htmlspecialchars(
-                                                    $type . " " .
-                                                    $order['name'] . " - " . number_format((float) $order['weight'] * 1000, 0) .
-                                                    "qr, (istehsal: " . date('d.m.Y', strtotime($order['production_date'])) . ")"
-                                                ) ?>
+                                                <strong><?= $kind; ?></strong>
+                                                <hr>
+                                                <?php
+                                                if ($kind == 'Hazır məhsul') {
+                                                    echo htmlspecialchars(
+                                                        $type . " " .
+                                                        $order['name'] . " - " . number_format((float) $order['weight'] * 1000, 0) .
+                                                        "qr, (istehsal: " . date('d.m.Y', strtotime($order['production_date'])) . ")"
+                                                    );
+                                                } else {
+                                                    echo $order['name'];
+                                                }
+                                                ?>
                                             </td>
 
 
                                             <td>
-                                                <?= $order['qty'] ?> ədəd
+                                                <?= $order['qty'] ?>
+
+                                                <?php
+                                                if ($kind == 'Xammal') {
+                                                    $stmt = $pdo->prepare("
+                                                        SELECT unit
+                                                        FROM raw_materials
+                                                        WHERE name = ?
+                                                    ");
+
+                                                    $stmt->execute([$name]);
+
+                                                    $unit = $stmt->fetchColumn();
+
+                                                    echo $unit ?: '';
+                                                } elseif ($kind == 'Hazır məhsul') {
+                                                    echo 'əd';
+                                                } elseif ($kind == 'Sous' || $kind == 'Aromatlı sous') {
+                                                    echo 'kq';
+                                                }
+                                                ?>
+
                                             </td>
 
                                             <td>
@@ -119,8 +218,9 @@ ORDER BY created_at DESC
                                                 <?= (float) $order['sell_price'] * $order['qty']; ?> ₼
                                                 <br>
                                                 <small>
-                                                    Qazanc: 
-                                                    <?= (float) ($order['sell_price'] - $order['cost']) * $order['qty']; ?> ₼
+                                                    Qazanc:
+                                                    <?= (float) ($order['sell_price'] - $order['cost']) * $order['qty']; ?>
+                                                    ₼
                                                 </small>
                                             </td>
 
@@ -136,6 +236,18 @@ ORDER BY created_at DESC
                                         </tr>
 
                                     <?php endforeach; ?>
+
+                                    <tr>
+                                        <td></td>
+                                        <td></td>
+                                        <td><strong>Cəmi maya:<br><?= $totalCost; ?> ₼</strong></td>
+                                        <td><strong>Cəmi satış:<br><?= $totalRevenue ?> ₼</strong></td>
+                                        <td><strong>Qazanc:<br><?= $totalProfit ?> ₼</strong></td>
+                                        <td></td>
+                                        <td></td>
+                                    </tr>
+
+
                                 </tbody>
 
                             </table>

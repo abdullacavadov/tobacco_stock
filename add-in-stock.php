@@ -135,7 +135,7 @@
                                         <div class="form-floating mb-3">
                                             <input class="form-control" id="price" type="number" name="price"
                                                 step="0.0001" min="0.0001" placeholder="100 ₼" />
-                                            <label for="price">Qiymət (AZN)</label>
+                                            <label for="price">Ümumi qiymət (AZN)</label>
                                         </div>
                                     </div>
 
