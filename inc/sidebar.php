@@ -39,12 +39,12 @@
                 </a>
 
                 <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts"
-                    aria-expanded="false" aria-controls="collapseLayouts">
+                    aria-expanded="false" aria-controls="collapseLayouts3">
                     <div class="sb-nav-link-icon"><i class="fa-solid fa-spray-can-sparkles"></i></div>
                     Dadlandırma
                     <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
                 </a>
-                <div class="collapse" id="collapseLayouts" aria-labelledby="headingOne"
+                <div class="collapse" id="collapseLayouts3" aria-labelledby="headingOne"
                     data-bs-parent="#sidenavAccordion">
                     <nav class="sb-sidenav-menu-nested nav">
                         <a class="nav-link" href="recipes.php">Reseptlər</a>
@@ -57,10 +57,22 @@
                     Qablaşdırma
                 </a>
 
-                <a class="nav-link" href="orders.php">
+
+                <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts"
+                    aria-expanded="false" aria-controls="collapseLayouts">
                     <div class="sb-nav-link-icon"><i class="fa-solid fa-manat-sign"></i></div>
                     Satış
+                    <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
                 </a>
+                <div class="collapse" id="collapseLayouts" aria-labelledby="headingOne"
+                    data-bs-parent="#sidenavAccordion">
+                    <nav class="sb-sidenav-menu-nested nav">
+                        <a class="nav-link" href="raw-orders.php">Xammal</a>
+                        <a class="nav-link" href="sauce-orders.php">Sous</a>
+                        <a class="nav-link" href="flavour-orders.php">Aromatlı sous</a>
+                        <a class="nav-link" href="orders.php">Qablaşdırılmış məhsul</a>
+                    </nav>
+                </div>
 
                 <a class="nav-link" href="statistics.php">
                     <div class="sb-nav-link-icon"><i class="fa-solid fa-chart-line"></i></div>
