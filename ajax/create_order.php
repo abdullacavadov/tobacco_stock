@@ -11,7 +11,7 @@ try {
     $items = $_POST['items'] ?? [];
     $custName = trim($_POST['customer'] ?? '');
     $order_no = date('YmdHis') . random_int(1000, 9999);
-    
+
     if (empty($items)) {
         throw new Exception('Ən azı bir məhsul seçilməlidir.');
     }
@@ -228,9 +228,9 @@ try {
                 break;
         }
 
-        if ($sellPrice < $cost * $qty) {
+        if ($sellPrice < $cost) {
             throw new Exception(
-                $name . ': satış qiyməti maya dəyərindən azdır. Miqdarın mayası: ' . $cost * $qty . '₼'
+                $name . ': satış qiyməti maya dəyərindən azdır. Miqdarın mayası: ' . $cost . '₼'
             );
         }
 

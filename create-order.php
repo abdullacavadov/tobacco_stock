@@ -109,7 +109,7 @@
                                                     <input class="form-control" type="number" step="0.0001"
                                                         name="items[0][price]">
 
-                                                    <label>Miqdarın qiyməti</label>
+                                                    <label>Vahidin qiyməti</label>
 
                                                 </div>
                                             </div>

@@ -121,10 +121,10 @@ $totalProfit = 0;
 
                                         <?php
                                         $revenue = (float) $order['sell_price'];
-                                        $profit = ((float) $order['sell_price'] - (float) $order['cost']) * $order['qty'];
+                                        $profit = (float) (($order['sell_price'] - $order['cost']) * $order['qty']);
 
                                         $totalCost += (float) $order['cost'] * $order['qty']; // ümumi maya dəyəri
-                                        $totalRevenue += $revenue;
+                                        $totalRevenue += (float) $revenue * $order['qty']; //ümumi dövriyyə
                                         $totalProfit += $profit;
                                         ?>
 
@@ -178,16 +178,16 @@ $totalProfit = 0;
                                             </td>
 
                                             <td>
-                                                <?= number_format(((float) $order['sell_price'] / (float) $order['qty']), 4); ?>
+                                                <?= number_format((float) $order['sell_price'], 4); ?>
                                                 ₼
                                             </td>
 
                                             <td>
-                                                <?= (float) $order['sell_price']; ?> ₼
+                                                <?= number_format((float) $order['sell_price'] * $order['qty'], 4); ?> ₼
                                                 <br>
                                                 <small>
                                                     Qazanc:
-                                                    <?= number_format(((float) $order['sell_price'] - ($order['cost'] * $order['qty'])), 4); ?>
+                                                    <?= number_format((float) $profit, 4); ?>
                                                     ₼
                                                 </small>
                                             </td>
