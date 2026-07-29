@@ -54,11 +54,16 @@ try {
         $recipe[$row['raw_material_name']] = $row['percentage'] / 100;
     }
 
-    // Xammal hesablanacaq baza miqdarı
-    $recipeKg = $kg;
 
-    // $loss % istehsal itkisi varsa
-    $recipeKg = $kg / (1 - $loss / 100);
+
+    if ($loss > 0) {
+        // $loss % istehsal itkisi varsa
+        $recipeKg = $kg / (1 - $loss / 100);
+    } else {
+        // Xammal hesablanacaq baza miqdarı
+        $recipeKg = $kg;
+    }
+
 
 
     $rows = [];
@@ -114,14 +119,18 @@ try {
                 $remaining
             );
 
-            $cost = $used * $stockRow['price'];
+            // 1 kq qiyməti
+            $unitPrice = $stockRow['price'] / $stockRow['stock'];
+
+            // İstifadə olunan hissənin qiyməti
+            $cost = $used * $unitPrice;
 
             $rows[] = [
                 'name' => $materialName,
                 'in_stock' => date('d.m.Y', strtotime($stockRow['in_stock'])),
                 'used' => round($used, 3) . ' kq',
-                'price' => round($stockRow['price'], 2) . ' AZN',
-                'total_price' => round($cost, 2) . ' AZN',
+                'price' => round($unitPrice, 3) . ' AZN',
+                'total_price' => round($cost, 3) . ' AZN',
                 'remaining' => round(
                     $stockRow['stock'] - $used,
                     3
@@ -140,7 +149,7 @@ try {
         'finished_kg' => round($kg, 3),
         'loss' => $loss,
         'rows' => $rows,
-        'total_cost' => round($totalCost, 2)
+        'total_cost' => round($totalCost, 3)
     ], JSON_UNESCAPED_UNICODE);
 
 } catch (Exception $e) {

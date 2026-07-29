@@ -105,13 +105,8 @@ foreach ($rows as $row) {
 
                                                     <option value="<?= htmlspecialchars($recipe['id']) ?>">
                                                         <?= htmlspecialchars($recipe['name']) ?> - <strong class="text-uppercase"><?= $recipe['type'] ?></strong>
-                                                        (<?php foreach ($recipe['items'] as $item): ?>
-
-                                                            <span>
-                                                                <?= htmlspecialchars($item['raw_material_name']) . ' - ' . number_format($item['percentage'], 2) . '%' ?>
-
-                                                            </span>
-
+                                                        (<?php foreach ($recipe['items'] as $index => $item): ?>
+                                                            <?= $index > 0 ? ', ' : '' ?><?= htmlspecialchars($item['raw_material_name']) . ' - ' . number_format($item['percentage'], 2) . '%' ?>
                                                         <?php endforeach; ?>) 
                                                         
                                                         <?php if ($recipe['loss'] > 0): ?>

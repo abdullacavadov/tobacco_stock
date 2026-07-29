@@ -170,9 +170,9 @@ $products = $pdo
                                             </td>
 
                                             <td>
-                                                <?= $item['price']; ?> ₼
+                                                <?= $item['price'] / $item['stock']; ?> ₼
                                                 <br>
-                                                <small><b>(Cəmi: <?= (float) $item['price'] * $item['stock']; ?>
+                                                <small><b>(Cəmi: <?= (float) $item['price']; ?>
                                                         ₼)</b></small>
                                             </td>
 

@@ -59,12 +59,13 @@ try {
         $recipe[$row['raw_material_name']] = $row['percentage'] / 100;
     }
 
-    // Material hesablanacaq baza miqdarı
-    $recipeKg = $kg;
-
-    // sousda $loss % itki varsa
-    $recipeKg = $kg / (1 - $loss / 100);
-
+    if ($loss > 0) {
+        // $loss % istehsal itkisi varsa
+        $recipeKg = $kg / (1 - $loss / 100);
+    } else {
+        // Xammal hesablanacaq baza miqdarı
+        $recipeKg = $kg;
+    }
 
     $cost = 0;
 
@@ -117,21 +118,39 @@ try {
                 break;
             }
 
-            $used = min(
-                $stockRow['stock'],
-                $remaining
-            );
+            // Bu partiyadan nə qədər istifadə olunacaq
+            $used = min($stockRow['stock'], $remaining);
 
-            $cost += $used * $stockRow['price'];
+            // 1 vahidin qiyməti
+            $unitPrice = $stockRow['price'] / $stockRow['stock'];
+
+            // İstifadə olunan hissənin dəyəri
+            $usedPrice = round($unitPrice * $used, 4);
+
+            // Ümumi maya dəyərinə əlavə et
+            $cost += $usedPrice;
+
+            // Yeni qalıqlar
+            $newStock = round($stockRow['stock'] - $used, 4);
+            $newPrice = round($stockRow['price'] - $usedPrice, 4);
+
+            // Float xətalarının qarşısını al
+            if ($newStock <= 0.0001) {
+                $newStock = 0;
+                $newPrice = 0;
+            }
 
             $update = $pdo->prepare("
                 UPDATE raw_materials
-                SET stock = stock - ?
+                SET
+                    stock = ?,
+                    price = ?
                 WHERE id = ?
             ");
 
             $update->execute([
-                $used,
+                $newStock,
+                $newPrice,
                 $stockRow['id']
             ]);
 
