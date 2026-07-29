@@ -73,43 +73,10 @@ $totalProfit = 0;
                             </form>
 
 
-                            <div class="dropdown">
-                                <button class="btn btn-success dropdown-toggle" type="button" data-bs-toggle="dropdown"
-                                    aria-expanded="false">
-                                    <i class="fas fa-plus"></i>
-                                    Satış reallaşdır
-                                </button>
-
-                                <ul class="dropdown-menu">
-                                    <li>
-                                        <a class="dropdown-item" href="create-raw-order.php">
-                                            <i class="fa-solid fa-warehouse"></i>
-                                            Xammal
-                                        </a>
-                                    </li>
-
-                                    <li>
-                                        <a class="dropdown-item" href="create-sauce-order.php">
-                                            <i class="fa-solid fa-flask"></i>
-                                            Sous
-                                        </a>
-                                    </li>
-
-                                    <li>
-                                        <a class="dropdown-item" href="create-flavour-order.php">
-                                            <i class="fa-solid fa-spray-can-sparkles"></i>
-                                            Aromatlı sous
-                                        </a>
-                                    </li>
-
-                                    <li>
-                                        <a class="dropdown-item" href="create-order.php">
-                                            <i class="fa-solid fa-box-open"></i>
-                                            Qablaşdırılmış məhsul
-                                        </a>
-                                    </li>
-                                </ul>
-                            </div>
+                            <a class="btn btn-success" href="create-order.php">
+                                <i class="fas fa-plus"></i>
+                                Satış reallaşdır
+                            </a>
                         </div>
                         <div class="card-body">
                             <table id="datatablesSimple" class="table table-striped">
@@ -118,7 +85,7 @@ $totalProfit = 0;
                                         <th>Məhsul</th>
                                         <th>Miqdar</th>
                                         <th>Maya</th>
-                                        <th>Satış</th>
+                                        <th>Satış (vahid)</th>
                                         <th>Yekun</th>
                                         <th>Müştəri</th>
                                         <th>Tarix</th>
@@ -153,7 +120,7 @@ $totalProfit = 0;
                                         ?>
 
                                         <?php
-                                        $revenue = (float) $order['sell_price'] * $order['qty'];
+                                        $revenue = (float) $order['sell_price'];
                                         $profit = ((float) $order['sell_price'] - (float) $order['cost']) * $order['qty'];
 
                                         $totalCost += (float) $order['cost'] * $order['qty']; // ümumi maya dəyəri
@@ -207,19 +174,20 @@ $totalProfit = 0;
                                             </td>
 
                                             <td>
-                                                <?= (float) $order['cost']; ?> ₼
+                                                <?= number_format(((float) $order['cost']), 4); ?> ₼
+                                            </td>
+
+                                            <td>
+                                                <?= number_format(((float) $order['sell_price'] / (float) $order['qty']), 4); ?>
+                                                ₼
                                             </td>
 
                                             <td>
                                                 <?= (float) $order['sell_price']; ?> ₼
-                                            </td>
-
-                                            <td>
-                                                <?= (float) $order['sell_price'] * $order['qty']; ?> ₼
                                                 <br>
                                                 <small>
                                                     Qazanc:
-                                                    <?= (float) ($order['sell_price'] - $order['cost']) * $order['qty']; ?>
+                                                    <?= number_format(((float) $order['sell_price'] - ($order['cost'] * $order['qty'])), 4); ?>
                                                     ₼
                                                 </small>
                                             </td>

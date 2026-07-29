@@ -46,86 +46,100 @@
                         <div class="card-body">
                             <form id="create_order">
 
-
                                 <div class="row">
 
                                     <div class="col-md-12 mb-3">
                                         <div class="form-floating">
-                                            <select class="form-control" id="name" name="name">
-
-                                                <?php
-                                                $stmt = $pdo->query("
-                                                    SELECT
-                                                        *
-                                                    FROM products 
-                                                    WHERE stock > 0 
-                                                    ORDER BY production_date DESC
-                                                ");
-                                                $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                                                ?>
-
-                                                <?php foreach ($rows as $row): ?>
-
-                                                    <?php
-                                                    if ($row['type'] == 'premium') {
-                                                        $type = 'PREMIUM';
-                                                    } else {
-                                                        $type = 'STRONG';
-                                                    }
-                                                    ?>
-
-                                                    <option value="<?= htmlspecialchars($row['id']) ?>">
-                                                        <?= htmlspecialchars(
-                                                            $type . " " .
-                                                            $row['name'] . " - " . number_format((float) $row['weight'] * 1000, 0) .
-                                                            "qr, Maya dəyəri - " . $row['price'] .
-                                                            "₼ (stokda: " .
-                                                            (int) $row['stock'] .
-                                                            " əd, istehsal: " . date('d.m.Y', strtotime($row['production_date'])) . ")" 
-                                                        ) ?>
-                                                    </option>
-
-                                                <?php endforeach; ?>
-                                            </select>
-                                            <label for="name">Dad</label>
+                                            <input class="form-control" name="customer" type="text" placeholder="Alıcı">
+                                            <label>Alıcı</label>
                                         </div>
                                     </div>
-
-
-
-
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-floating">
-                                            <input class="form-control" id="qty" name="qty" type="number" step="1"
-                                                placeholder="100 əd" />
-                                            <label for="qty">Say (ədəd)</label>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-6 mb-3">
-                                        <div class="form-floating">
-                                            <input class="form-control" id="price" name="price" type="number" step="0.0001"
-                                                placeholder="10" />
-                                            <label for="price">Vahidin satış qiyməti (AZN)</label>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-12 mb-3">
-                                        <div class="form-floating">
-                                            <input class="form-control" id="customer" name="customer" type="text"
-                                                placeholder="Ağayev Elvin" />
-                                            <label for="customer">Alıcı</label>
-                                        </div>
-                                    </div>
-
 
                                 </div>
 
+                                <div id="items">
 
-                                <div class="mt-4 mb-0">
-                                    <div class="d-grid"><button type="submit" class="btn btn-primary btn-block">Əlavə
-                                            et</button></div>
+                                    <div class="item-row border rounded p-3 mb-3">
+
+                                        <div class="row">
+
+                                            <div class="col-md-2 mb-3">
+                                                <div class="form-floating">
+
+                                                    <select class="form-control kind-select" name="items[0][kind]">
+
+                                                        <option value="raw">Xammal</option>
+                                                        <option value="sauce">Sous</option>
+                                                        <option value="flavour">Sous + Aroma</option>
+                                                        <option value="product">Hazır məhsul</option>
+
+                                                    </select>
+
+                                                    <label>Növ</label>
+
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-5 mb-3">
+                                                <div class="form-floating">
+
+                                                    <select class="form-control product-select" name="items[0][id]">
+
+                                                    </select>
+
+                                                    <label>Məhsul</label>
+
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2 mb-3">
+                                                <div class="form-floating">
+
+                                                    <input class="form-control" type="number" step="0.001"
+                                                        name="items[0][qty]">
+
+                                                    <label>Miqdar</label>
+
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-2 mb-3">
+                                                <div class="form-floating">
+
+                                                    <input class="form-control" type="number" step="0.0001"
+                                                        name="items[0][price]">
+
+                                                    <label>Miqdarın qiyməti</label>
+
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-1 d-flex align-items-center">
+
+                                                <button type="button" class="btn btn-danger remove-row w-100">
+                                                    <i class="fas fa-xmark"></i>
+                                                </button>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
                                 </div>
+
+                                <div class="d-flex justify-content-end mb-4">
+                                    <button type="button" class="btn btn-success add-row">
+                                        <i class="fas fa-plus"></i> Məhsul əlavə et
+                                    </button>
+                                </div>
+
+                                <div class="d-grid mt-4">
+                                    <button class="btn btn-primary" type="submit">
+                                        Satışı tamamla
+                                    </button>
+                                </div>
+
                             </form>
 
                             <div id="recipePreview" class="mt-4"></div>
@@ -149,6 +163,129 @@
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <script>
+        const items = document.getElementById("items");
+
+        let index = 1;
+
+        async function loadProducts(row) {
+
+            const kind = row.querySelector(".kind-select").value;
+            const select = row.querySelector(".product-select");
+
+            select.innerHTML = '<option>Yüklənir...</option>';
+
+            const response = await fetch(
+                "./ajax/get_products.php?kind=" + encodeURIComponent(kind)
+            );
+
+            const data = await response.json();
+
+            select.innerHTML = "";
+
+            if (!data.success) {
+
+                select.innerHTML =
+                    "<option>Məhsul tapılmadı</option>";
+
+                return;
+            }
+
+            data.products.forEach(product => {
+
+                const option = document.createElement("option");
+
+                option.value = product.id;
+                option.textContent = product.text;
+
+                select.appendChild(option);
+
+            });
+
+        }
+
+
+        function updateRemoveButtons() {
+
+            const rows = document.querySelectorAll(".item-row");
+
+            rows.forEach((row, i) => {
+                const btn = row.querySelector(".remove-row");
+                if (rows.length === 1) {
+                    btn.style.visibility = "hidden";
+                } else {
+                    btn.style.visibility = "visible";
+                }
+            });
+
+        }
+
+
+        document.addEventListener("DOMContentLoaded", () => {
+            loadProducts(document.querySelector(".item-row"));
+            updateRemoveButtons();
+        });
+
+        document.addEventListener("change", function (e) {
+            if (e.target.classList.contains("kind-select")) {
+                loadProducts(
+                    e.target.closest(".item-row")
+                );
+            }
+        });
+
+        document.addEventListener("click", function (e) {
+
+            if (e.target.closest(".add-row")) {
+
+                const clone =
+                    document.querySelector(".item-row")
+                        .cloneNode(true);
+
+                clone.querySelectorAll("[name]").forEach(el => {
+
+                    el.name = el.name.replace(
+                        /\[\d+\]/,
+                        `[${index}]`
+                    );
+
+                    if (el.tagName === "INPUT") {
+                        el.value = "";
+                    }
+
+                });
+
+                clone.querySelector(".product-select").innerHTML = "";
+
+                items.appendChild(clone);
+
+                loadProducts(clone);
+
+                index++;
+
+                updateRemoveButtons();
+
+                // yeni sətirə scroll
+                clone.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center"
+                });
+
+            }
+
+
+            if (e.target.closest(".remove-row")) {
+
+                e.target
+                    .closest(".item-row")
+                    .remove();
+
+                updateRemoveButtons();
+
+            }
+
+        });
+    </script>
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
