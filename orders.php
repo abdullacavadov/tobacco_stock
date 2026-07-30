@@ -3,6 +3,16 @@
 
 require 'inc/db.php';
 
+$orderTotalCost = $pdo
+    ->query("SELECT COALESCE(SUM(cost*qty), 0) FROM orders")
+    ->fetchColumn();
+
+$orderTotalPrice = $pdo
+    ->query("SELECT COALESCE(SUM(sell_price*qty), 0) FROM orders")
+    ->fetchColumn();
+
+$fullProfit = $orderTotalPrice - $orderTotalCost;
+
 if (!isset($_GET['kind'])) {
     $sql = "SELECT * FROM orders ORDER BY created_at DESC";
 } else {
@@ -205,20 +215,28 @@ $totalProfit = 0;
 
                                     <?php endforeach; ?>
 
-                                    <tr>
-                                        <td></td>
-                                        <td></td>
-                                        <td><strong>Cəmi maya:<br><?= $totalCost; ?> ₼</strong></td>
-                                        <td><strong>Cəmi satış:<br><?= $totalRevenue ?> ₼</strong></td>
-                                        <td><strong>Qazanc:<br><?= $totalProfit ?> ₼</strong></td>
-                                        <td></td>
-                                        <td></td>
-                                    </tr>
-
-
                                 </tbody>
 
                             </table>
+
+                            <div class="alert alert-info">
+                                <strong>
+                                    Cəmi maya dəyəri:
+                                    <?= number_format((float) $orderTotalCost, 3, ',', ' '); ?> AZN
+                                </strong>
+                                <br>
+                                <strong>
+                                    Cəmi satş həcmi:
+                                    <?= number_format((float) $orderTotalPrice, 3, ',', ' '); ?> kq
+                                </strong>
+                                <br>
+                                <strong>
+                                    Cəmi qazanc:
+                                    <?= number_format((float) $fullProfit, 3, ',', ' '); ?> kq
+                                </strong>
+                            </div>
+
+
                         </div>
                     </div>
                 </div>

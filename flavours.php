@@ -3,6 +3,14 @@
 
 require 'inc/db.php';
 
+$flavourTotalCost = $pdo
+    ->query("SELECT COALESCE(SUM(cost), 0) FROM sauce_with_flavour")
+    ->fetchColumn();
+
+$flavourTotalStock = $pdo
+    ->query("SELECT COALESCE(SUM(qty), 0) FROM sauce_with_flavour")
+    ->fetchColumn();
+
 $flavours = $pdo
     ->query("
 SELECT *
@@ -128,6 +136,18 @@ ORDER BY created_at DESC
                                 </tbody>
 
                             </table>
+
+                            <div class="alert alert-info">
+                                <strong>
+                                    Cəmi aromalı sous dəyəri:
+                                    <?= number_format((float) $flavourTotalCost, 3, ',', ' '); ?> AZN
+                                </strong>
+                                <br>
+                                <strong>
+                                    Cəmi aromalı sous həcmi:
+                                    <?= number_format((float) $flavourTotalStock, 3, ',', ' '); ?> kq
+                                </strong>
+                            </div>
                         </div>
                     </div>
                 </div>

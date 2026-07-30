@@ -3,6 +3,14 @@
 
 require 'inc/db.php';
 
+$productTotalCost = $pdo
+    ->query("SELECT COALESCE(SUM(stock*price), 0) FROM products")
+    ->fetchColumn();
+
+$productTotalStock = $pdo
+    ->query("SELECT COALESCE(SUM(stock), 0) FROM products")
+    ->fetchColumn();
+
 $products = $pdo
     ->query("
 SELECT *
@@ -91,9 +99,9 @@ ORDER BY in_stock DESC, stock DESC
                                             </td>
 
                                             <?php if ($product['type'] === 'premium'): ?>
-                                                <td class="premium-cell">Premium (<?= $product['weight']*1000 ?>qr)</td>
+                                                <td class="premium-cell">Premium (<?= $product['weight'] * 1000 ?>qr)</td>
                                             <?php else: ?>
-                                                <td class="strong-cell">Strong (<?= $product['weight']*1000 ?>qr)</td>
+                                                <td class="strong-cell">Strong (<?= $product['weight'] * 1000 ?>qr)</td>
                                             <?php endif; ?>
 
                                             <td>
@@ -103,7 +111,8 @@ ORDER BY in_stock DESC, stock DESC
                                             <td>
                                                 <?= (float) $product['price']; ?> ₼
                                                 <br>
-                                                <small><b>(Cəmi: <?= (float) $product['price'] * $product['stock']; ?> ₼)</b></small>
+                                                <small><b>(Cəmi: <?= (float) $product['price'] * $product['stock']; ?>
+                                                        ₼)</b></small>
                                             </td>
 
                                             <td>
@@ -115,7 +124,8 @@ ORDER BY in_stock DESC, stock DESC
                                             </td>
 
                                             <td>
-                                                <a href="edit-product.php?pid=<?= $product['id']; ?>" class="btn btn-primary">
+                                                <a href="edit-product.php?pid=<?= $product['id']; ?>"
+                                                    class="btn btn-primary">
                                                     <i class="fas fa-pen"></i>
                                                 </a>
 
@@ -130,8 +140,20 @@ ORDER BY in_stock DESC, stock DESC
                                     <?php endforeach; ?>
                                 </tbody>
 
-                                
+
                             </table>
+
+                            <div class="alert alert-info">
+                                <strong>
+                                    Cəmi hazır məhsul dəyəri:
+                                    <?= number_format((float) $productTotalCost, 3, ',', ' '); ?> AZN
+                                </strong>
+                                <br>
+                                <strong>
+                                    Cəmi hazır məhsul sayı:
+                                    <?= number_format((float) $productTotalStock, 2, ',', ' '); ?> əd
+                                </strong>
+                            </div>
                         </div>
                     </div>
                 </div>

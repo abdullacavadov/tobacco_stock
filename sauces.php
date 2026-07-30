@@ -3,6 +3,14 @@
 
 require 'inc/db.php';
 
+$sauceTotalCost = $pdo
+    ->query("SELECT COALESCE(SUM(price), 0) FROM sauce_stock")
+    ->fetchColumn();
+
+$sauceTotalStock = $pdo
+    ->query("SELECT COALESCE(SUM(stock), 0) FROM sauce_stock")
+    ->fetchColumn();
+
 $sauces = $pdo
     ->query("
 SELECT *
@@ -131,6 +139,18 @@ ORDER BY created_at DESC
                                 </tbody>
 
                             </table>
+                            <div class="alert alert-info">
+                                <strong>
+                                    Cəmi sous dəyəri:
+                                    <?= number_format((float) $sauceTotalCost, 3, ',', ' '); ?> AZN
+                                </strong>
+                                <br>
+                                <strong>
+                                    Cəmi sous həcmi:
+                                    <?= number_format((float) $sauceTotalStock, 3, ',', ' '); ?> kq
+                                </strong>
+                            </div>
+
                         </div>
                     </div>
                 </div>

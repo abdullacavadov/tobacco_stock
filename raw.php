@@ -3,6 +3,9 @@
 
 require 'inc/db.php';
 
+$rawTotal = $pdo
+    ->query("SELECT COALESCE(SUM(price), 0) FROM raw_materials")
+    ->fetchColumn();
 
 if (!isset($_GET['type'])) {
     $sql = "SELECT * FROM raw_materials WHERE stock > 0 ORDER BY in_stock DESC";
@@ -14,6 +17,8 @@ if (!isset($_GET['type'])) {
 $products = $pdo
     ->query($sql)
     ->fetchAll();
+
+
 
 ?>
 
@@ -95,6 +100,12 @@ $products = $pdo
                             </form>
 
 
+                            <style>
+                                #datatablesSimple tfoot {
+                                    display: table-footer-group !important;
+                                }
+                            </style>
+
 
                             <a class="btn btn-success" href="add-in-stock.php">
                                 <i class="fas fa-plus"></i>
@@ -140,12 +151,11 @@ $products = $pdo
                                         <tr>
 
                                             <td>
-                                               
-                                                <span class="d-flex align-items-center">
-                                                     <?= $item['name'] ?>
 
-                                                    <button type="button"
-                                                        class="info-badge description-btn"
+                                                <span class="d-flex align-items-center">
+                                                    <?= $item['name'] ?>
+
+                                                    <button type="button" class="info-badge description-btn"
                                                         data-bs-toggle="modal" data-bs-target="#descriptionModal"
                                                         data-title="<?= htmlspecialchars($item['name'], ENT_QUOTES) ?>"
                                                         data-description="<?= htmlspecialchars($item['description'], ENT_QUOTES) ?>">
@@ -194,8 +204,19 @@ $products = $pdo
                                         </tr>
 
                                     <?php endforeach; ?>
+
+                                    <tr>
+
+                                    </tr>
                                 </tbody>
+
+
                             </table>
+                            <div class="alert alert-info">
+                                <strong>
+                                    Cəmi xammal dəyəri: <?= number_format((float) $rawTotal, 3, ',', ' '); ?> AZN
+                                </strong>
+                            </div>
                         </div>
                     </div>
                 </div>
