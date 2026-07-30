@@ -33,9 +33,20 @@ if (!isset($_POST['price']) || $_POST['price'] === '') {
     exit('Məhsulun qiymətini qeyd edin (AZN).');
 }
 
+if ($type == 'raw') {
+    $unit = 'kq';
+} elseif ($type == 'flavour') {
+    $unit = 'kq';
+} elseif ($type == 'package') {
+    $unit = 'əd';
+} elseif ($type == 'label') {
+    $unit = 'əd';
+} elseif ($type == 'cover') {
+    $unit = 'əd';
+}
 
-$statement = $pdo->prepare("INSERT INTO raw_materials (name, type, stock, price, supplier, description) VALUES (?,?,?,?,?,?)");
-$statement->execute([$name, $type, $stock, $price, $supplier, $description]);
+$statement = $pdo->prepare("INSERT INTO raw_materials (name, type, stock, unit, price, supplier, description) VALUES (?,?,?,?,?,?)");
+$statement->execute([$name, $type, $stock, $unit, $price, $supplier, $description]);
 
 
 echo 'success';

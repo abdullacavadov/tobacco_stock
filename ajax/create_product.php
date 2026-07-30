@@ -114,9 +114,10 @@ try {
             $remainingPackage
         );
 
-        // Partiyanın 1 ədəd qiyməti
-        $unitPrice = $batch['price'];
+        //Vahidin qiyməti
+        $unitPrice = $batch['price'] / $batch['stock'];
 
+        //istifadə olunanın qiyməti
         $usedCost = round(
             $unitPrice * $used,
             4
@@ -196,9 +197,10 @@ try {
                 $remainingLabel
             );
 
-            // 1 ədəd etiketin qiyməti
-            $unitPrice = $batch['price'];
+            //Vahidin qiyməti
+            $unitPrice = $batch['price'] / $batch['stock'];
 
+            //istifadə olunanın qiyməti
             $usedCost = round(
                 $unitPrice * $used,
                 4
@@ -281,9 +283,10 @@ try {
                 $remainingCover
             );
 
-            // 1 ədəd paketin qiyməti
-            $unitPrice = $batch['price'];
+            //Vahidin qiyməti
+            $unitPrice = $batch['price'] / $batch['stock'];
 
+            //istifadə olunanın qiyməti
             $usedCost = round(
                 $unitPrice * $used,
                 4
@@ -365,10 +368,10 @@ try {
             $remainingSauce
         );
 
-        // 1 kq qiyməti
+        //Vahidin qiyməti
         $unitPrice = $batch['cost'] / $batch['qty'];
 
-        // istifadə olunan hissənin qiyməti
+        //istifadə olunanın qiyməti
         $usedCost = round(
             $unitPrice * $used,
             4
@@ -388,16 +391,18 @@ try {
 
 
     $updateMaterial = $pdo->prepare("
-        UPDATE raw_materials
-        SET
-            stock = stock - ?
-        WHERE id = ?
-    ");
+    UPDATE raw_materials
+    SET
+        stock = ROUND(stock - ?, 4),
+        price = ROUND(price - ?, 4)
+    WHERE id = ?
+");
 
     foreach ($packagePlan as $row) {
 
         $updateMaterial->execute([
             $row['used'],
+            $row['used_cost'],
             $row['id']
         ]);
 
@@ -410,6 +415,7 @@ try {
 
             $updateMaterial->execute([
                 $row['used'],
+                $row['used_cost'],
                 $row['id']
             ]);
 
@@ -420,9 +426,9 @@ try {
     if ($cover !== '') {
 
         foreach ($coverPlan as $row) {
-
             $updateMaterial->execute([
                 $row['used'],
+                $row['used_cost'],
                 $row['id']
             ]);
 
@@ -434,8 +440,8 @@ try {
     $updateSauce = $pdo->prepare("
         UPDATE sauce_with_flavour
         SET
-            qty = qty - ?,
-            cost = cost - ?
+            qty = ROUND(qty - ?, 4),
+            cost = ROUND(cost - ?, 4)
         WHERE id = ?
     ");
 
@@ -484,6 +490,89 @@ try {
         $productPrice,
         $prod_date
     ]);
+
+    $productId = $pdo->lastInsertId();
+
+    $insertMaterialUsage = $pdo->prepare("
+    INSERT INTO product_material_usage
+        (
+            product_id,
+            material_id,
+            material_type,
+            qty,
+            cost
+        )
+        VALUES
+        (
+            ?, ?, ?, ?, ?
+        )
+    ");
+
+
+    foreach ($packagePlan as $row) {
+
+        $insertMaterialUsage->execute([
+            $productId,
+            $row['id'],
+            'package',
+            $row['used'],
+            $row['used_cost']
+        ]);
+
+    }
+
+
+    foreach ($labelPlan as $row) {
+
+        $insertMaterialUsage->execute([
+            $productId,
+            $row['id'],
+            'label',
+            $row['used'],
+            $row['used_cost']
+        ]);
+
+    }
+
+
+    foreach ($coverPlan as $row) {
+
+        $insertMaterialUsage->execute([
+            $productId,
+            $row['id'],
+            'cover',
+            $row['used'],
+            $row['used_cost']
+        ]);
+
+    }
+
+
+    $insertSauceUsage = $pdo->prepare("
+        INSERT INTO product_flavour_sauce_usage
+        (
+            product_id,
+            sauce_id,
+            qty,
+            cost
+        )
+        VALUES
+        (
+            ?, ?, ?, ?
+        )
+    ");
+
+    foreach ($saucePlan as $row) {
+
+        $insertSauceUsage->execute([
+            $productId,
+            $row['id'],
+            $row['used_qty'],
+            $row['used_cost']
+        ]);
+
+    }
+
 
 
     $pdo->commit();

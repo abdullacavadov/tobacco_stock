@@ -100,12 +100,6 @@ $products = $pdo
                             </form>
 
 
-                            <style>
-                                #datatablesSimple tfoot {
-                                    display: table-footer-group !important;
-                                }
-                            </style>
-
 
                             <a class="btn btn-success" href="add-in-stock.php">
                                 <i class="fas fa-plus"></i>
@@ -132,18 +126,23 @@ $products = $pdo
                                         <?php
                                         if ($item['type'] == 'raw') {
                                             $item['type'] = 'Xammal';
+                                            $item['unit'] = 'kq';
                                             $color = 'primary';
                                         } elseif ($item['type'] == 'flavour') {
                                             $item['type'] = 'Aroma';
+                                            $item['unit'] = 'kq';
                                             $color = 'danger';
                                         } elseif ($item['type'] == 'package') {
                                             $item['type'] = 'Qab';
+                                            $item['unit'] = 'əd';
                                             $color = 'warning';
                                         } elseif ($item['type'] == 'label') {
                                             $item['type'] = 'Etiket';
+                                            $item['unit'] = 'əd';
                                             $color = 'success';
                                         } elseif ($item['type'] == 'cover') {
                                             $item['type'] = 'Paket';
+                                            $item['unit'] = 'əd';
                                             $color = 'dark';
                                         }
                                         ?>

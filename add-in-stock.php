@@ -63,6 +63,8 @@
                                                         $type = 'qab';
                                                     } elseif ($item['type'] == 'label') {
                                                         $type = 'etiket';
+                                                    } elseif ($item['type'] == 'cover') {
+                                                        $type = 'paket';
                                                     }
 
                                                     ?>
@@ -103,6 +105,7 @@
                                                 <option value="flavour">Aroma</option>
                                                 <option value="package">Qab</option>
                                                 <option value="label">Etiket</option>
+                                                <option value="cover">Paket</option>
                                             </select>
                                             <label for="type">Növü</label>
                                         </div>
@@ -127,7 +130,7 @@
                                         <div class="form-floating">
                                             <input class="form-control" id="stock" name="stock" type="number"
                                                 step="0.0001" min="0.0001" placeholder="100 kq" />
-                                            <label for="stock">Həcm (kq / əd)</label>
+                                            <label for="stock">Miqdar (kq / əd)</label>
                                         </div>
                                     </div>
 
