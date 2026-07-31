@@ -8,7 +8,7 @@ try {
 
     $name = trim($_POST['name'] ?? '');
     $sauceType = trim($_POST['sauce_type'] ?? '');
-    $flavourNames = $_POST['flavour_name'] ?? [];
+    $materialNames = $_POST['material_name'] ?? [];
     $percentages = $_POST['percentage'] ?? [];
 
 
@@ -21,31 +21,35 @@ try {
         throw new Exception('Yanlış sous növü');
     }
 
-    if (empty($flavourNames)) {
+    if (empty($materialNames)) {
         throw new Exception('Ən azı 1 dad seçilməlidir');
     }
 
 
-    $cleanFlavours = array_map('trim', $flavourNames);
+    $cleanMaterials = array_map('trim', $materialNames);
 
     $duplicates = [];
 
-    foreach ($cleanFlavours as $flavour) {
+    foreach ($cleanMaterials as $material) {
 
-        if (in_array($flavour, $duplicates)) {
+        if (in_array($material, $duplicates)) {
             continue;
         }
 
-        if (count(array_keys($cleanFlavours, $flavour)) > 1) {
-            $duplicates[] = $flavour;
+        if (count(array_keys($cleanMaterials, $material)) > 1) {
+            $duplicates[] = $material;
         }
     }
 
     if (!empty($duplicates)) {
         throw new Exception(
-            'Eyni dad bir reseptdə yalnız bir dəfə istifadə edilə bilər. Təkrarlanan dadlar: ' . implode(', ', $duplicates)
+            'Eyni xammal bir reseptdə yalnız bir dəfə istifadə edilə bilər. Təkrarlanan xammallar: ' . implode(', ', $duplicates)
         );
     }
+
+
+
+
 
 
     $pdo->beginTransaction();
@@ -61,6 +65,19 @@ try {
     if ($check->fetchColumn() > 0) {
         throw new Exception('Bu adda resept artıq mövcuddur');
     }
+
+
+
+
+    $checkMaterial = $pdo->prepare("
+    SELECT COUNT(*)
+    FROM raw_materials
+    WHERE
+        name = ?
+        AND type IN ('flavour','raw')
+");
+
+
 
     $stmt = $pdo->prepare("
         INSERT INTO flavour_recipes
@@ -101,32 +118,40 @@ try {
         )
     ");
 
-    $cleanFlavours = array_map('trim', $flavourNames);
+    $cleanMaterials = array_map('trim', $materialNames);
 
-    if (count($cleanFlavours) !== count(array_unique($cleanFlavours))) {
-        throw new Exception('Eyni dad bir reseptdə yalnız bir dəfə istifadə edilə bilər');
+    if (count($cleanMaterials) !== count(array_unique($cleanMaterials))) {
+        throw new Exception('Eyni xammal bir reseptdə yalnız bir dəfə istifadə edilə bilər');
     }
 
-    foreach ($flavourNames as $i => $flavourName) {
+    foreach ($materialNames as $i => $materialName) {
 
-        $flavourName = trim($flavourName);
+        $materialName = trim($materialName);
         $percentage = (float) ($percentages[$i] ?? 0);
 
-        if ($flavourName === '') {
-            throw new Exception('Dad seçilməyib');
+        if ($materialName === '') {
+            throw new Exception('Xammal seçilməyib');
         }
 
         if ($percentage <= 0) {
             throw new Exception(
-                $flavourName . ' üçün faiz düzgün deyil'
+                $materialName . ' üçün faiz düzgün deyil'
             );
         }
+
+
+        $checkMaterial->execute([$materialName]);
+
+        if (!$checkMaterial->fetchColumn()) {
+            throw new Exception($materialName . ' tapılmadı');
+        }
+
 
         $totalPercent += $percentage;
 
         $insertItem->execute([
             $recipeId,
-            $flavourName,
+            $materialName,
             $percentage
         ]);
     }

@@ -68,12 +68,16 @@
 
                                 <?php
 
-                                $flavours = $pdo->query("
-    SELECT DISTINCT name
-    FROM raw_materials
-    WHERE type='flavour'
-    ORDER BY name
-")->fetchAll(PDO::FETCH_COLUMN);
+                                $materials = $pdo->query("
+                                    SELECT
+                                        name,
+                                        type
+                                    FROM raw_materials
+                                    WHERE type IN ('flavour', 'raw')
+                                    ORDER BY
+                                        type,
+                                        name
+                                ")->fetchAll(PDO::FETCH_ASSOC);
                                 ?>
 
                                 <div id="flavoursContainer"></div>
@@ -183,7 +187,7 @@
 
     <script>
 
-        const flavours = <?= json_encode($flavours, JSON_UNESCAPED_UNICODE) ?>;
+        const materials = <?= json_encode($materials, JSON_UNESCAPED_UNICODE) ?>;
 
         const container = document.getElementById('flavoursContainer');
 
@@ -207,14 +211,20 @@
 
             let options = '';
 
-            flavours.forEach(name => {
+            materials.forEach(item => {
+
+                const label =
+                    item.type === 'flavour'
+                        ? '🍑 Aroma'
+                        : '🧪 Xammal';
 
                 options += `
-            <option value="${name}">
-                ${name}
-            </option>
-        `;
-
+                    <option
+                        value="${item.name}"
+                        data-type="${item.type}">
+                        ${item.name} (${label})
+                    </option>
+                `;
             });
 
             const row = document.createElement('div');
@@ -223,43 +233,43 @@
 
             row.innerHTML = `
 
-        <div class="col-md-7">
+                <div class="col-md-7">
 
-            <select
-                class="form-control flavour-name"
-                name="flavour_name[]">
+                    <select
+                        class="form-control flavour-name"
+                        name="material_name[]">
 
-                ${options}
+                        ${options}
 
-            </select>
+                    </select>
 
-        </div>
+                </div>
 
-        <div class="col-md-3">
+                <div class="col-md-3">
 
-            <input
-                type="number"
-                step="0.0001"
-                min="0"
-                class="form-control percentage-input"
-                name="percentage[]"
-                placeholder="%">
+                    <input
+                        type="number"
+                        step="0.0001"
+                        min="0"
+                        class="form-control percentage-input"
+                        name="percentage[]"
+                        placeholder="%">
 
-        </div>
+                </div>
 
-        <div class="col-md-2">
+                <div class="col-md-2">
 
-            <button
-                type="button"
-                class="btn btn-danger remove-row">
+                    <button
+                        type="button"
+                        class="btn btn-danger remove-row">
 
-                ×
+                        ×
 
-            </button>
+                    </button>
 
-        </div>
+                </div>
 
-    `;
+            `;
 
             container.appendChild(row);
 

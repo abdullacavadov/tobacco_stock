@@ -173,7 +173,7 @@ try {
                 price
             FROM raw_materials
             WHERE
-                type='flavour'
+                type IN ('flavour', 'raw')
                 AND name=?
                 AND stock>0
             ORDER BY in_stock ASC, id ASC
@@ -224,13 +224,20 @@ try {
                 $remaining
             );
 
+            $unitPrice = $batch['price'] / $batch['stock'];
+
+            $usedCost = round(
+                $unitPrice * $used,
+                4
+            );
 
             $materialPlan[] = [
                 'id' => $batch['id'],
-                'used' => $used
+                'used' => $used,
+                'used_cost' => $usedCost
             ];
 
-            $cost += $used * $batch['price'];
+            $cost += $usedCost;
 
             $remaining -= $used;
         }
@@ -258,7 +265,9 @@ try {
 
     $updateMaterial = $pdo->prepare("
         UPDATE raw_materials
-        SET stock = stock - ?
+        SET
+            stock = stock - ?,
+            price = price - ?
         WHERE id = ?
     ");
 
@@ -266,6 +275,7 @@ try {
 
         $updateMaterial->execute([
             $row['used'],
+            $row['used_cost'],
             $row['id']
         ]);
 
