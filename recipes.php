@@ -131,7 +131,25 @@ foreach ($rows as $row) {
 
                                             <div class="accordion-body">
 
-                                                Yaradılıb: <?= date('d.m.Y H:i', strtotime($recipe['created_at'])); ?>
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    Yaradılıb: <?= date('d.m.Y H:i', strtotime($recipe['created_at'])); ?>
+
+                                                    <span class="d-flex gap-3">
+                                                        <a href="edit-recipe.php?srid=<?= $recipe['id'] ?>"
+                                                            class=" text-primary ms-3 text-decoration-none">
+                                                            <i class="fas fa-edit"></i>
+                                                        </a>
+
+                                                        <a href="ajax/delete_recipe.php?frid=<?= $recipe['id']; ?>"
+                                                            class="text-danger ms-2 text-decoration-none delete-btn"
+                                                            type="button">
+                                                            <i class="fas fa-trash"></i>
+                                                        </a>
+                                                    </span>
+                                                </div>
+
+
+
                                                 <hr>
 
                                                 <table class="table table-sm table-bordered align-middle w-50">
@@ -189,6 +207,33 @@ foreach ($rows as $row) {
     <script src="assets/js/scripts.js"></script>
     <script src="assets/js/simple-datatables.min.js" crossorigin="anonymous"></script>
     <script src="assets/js/datatables-simple-demo.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        document.addEventListener("click", function (e) {
+            const btn = e.target.closest(".delete-btn");
+            if (!btn) return;
+
+            e.preventDefault();
+            const deleteUrl = btn.getAttribute("href");
+
+            Swal.fire({
+                title: "Silmək istədiyinizə əminsiniz?",
+                text: "Bu əməliyyat geri qaytarıla bilməz!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Bəli, sil",
+                cancelButtonText: "Ləğv et"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = deleteUrl;
+                }
+            });
+        });
+    </script>
 </body>
 
 </html>
