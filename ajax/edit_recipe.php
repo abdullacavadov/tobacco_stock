@@ -5,141 +5,117 @@ require '../inc/db.php';
 header('Content-Type: application/json; charset=utf-8');
 
 try {
-
     $recipeId = (int) ($_POST['recipe_id'] ?? 0);
-    $name = trim($_POST['name'] ?? '');
-    $type = trim($_POST['type'] ?? '');
-    $loss = (float) ($_POST['loss'] ?? 0);
-
-    $raw_name = $_POST['raw_name'] ?? [];
-    $percentages = $_POST['percentage'] ?? [];
 
     if ($recipeId <= 0) {
         throw new Exception('Resept tapılmadı');
     }
 
+    $name = trim($_POST['name'] ?? '');
+    $sauceType = trim($_POST['sauce_type'] ?? '');
+    $materialNames = $_POST['material_name'] ?? [];
+    $percentages = $_POST['percentage'] ?? [];
+
+
+
     if ($name === '') {
-        throw new Exception('Resept adı qeyd edin.');
+        throw new Exception('Resept adı boş ola bilməz');
     }
 
-    if (!in_array($type, ['premium', 'strong'])) {
-        throw new Exception('Yanlış sous növü.');
+    if (!in_array($sauceType, ['premium', 'strong'])) {
+        throw new Exception('Yanlış sous növü');
     }
 
-    if (empty($raw_name)) {
-        throw new Exception('Ən azı 1 xammal seçilməlidir.');
+    if (empty($materialNames)) {
+        throw new Exception('Ən azı 1 dad seçilməlidir');
     }
 
-    if ($type === 'strong' && ($loss < 0 || $loss > 100)) {
-        throw new Exception('İstehsal itkisi 0-100 arasında olmalıdır.');
-    }
 
-    $stmt = $pdo->prepare("
-        SELECT id
-        FROM sauce_recipes
-        WHERE id=?
-    ");
-
-    $stmt->execute([$recipeId]);
-
-    if (!$stmt->fetch()) {
-        throw new Exception('Resept tapılmadı.');
-    }
-
-    $stmt = $pdo->prepare("
-        SELECT COUNT(*)
-        FROM sauce_recipes
-        WHERE name=?
-        AND id<>?
-    ");
-
-    $stmt->execute([
-        $name,
-        $recipeId
-    ]);
-
-    if ($stmt->fetchColumn() > 0) {
-        throw new Exception('Bu adda resept artıq mövcuddur.');
-    }
-
-    $cleanRaws = array_map('trim', $raw_name);
+    $cleanMaterials = array_map('trim', $materialNames);
 
     $duplicates = [];
 
-    foreach ($cleanRaws as $raw) {
+    foreach ($cleanMaterials as $material) {
 
-        if (in_array($raw, $duplicates)) {
+        if (in_array($material, $duplicates)) {
             continue;
         }
 
-        if (count(array_keys($cleanRaws, $raw)) > 1) {
-            $duplicates[] = $raw;
+        if (count(array_keys($cleanMaterials, $material)) > 1) {
+            $duplicates[] = $material;
         }
-
     }
 
     if (!empty($duplicates)) {
-
         throw new Exception(
-            'Eyni xammal bir reseptdə yalnız bir dəfə istifadə edilə bilər. Təkrarlanan xammallar: '
-            . implode(', ', $duplicates)
+            'Eyni xammal bir reseptdə yalnız bir dəfə istifadə edilə bilər. Təkrarlanan xammallar: ' . implode(', ', $duplicates)
         );
-
     }
 
-    $totalPercent = 0;
 
-    foreach ($raw_name as $i => $raw) {
 
-        $raw = trim($raw);
-        $percentage = (float) ($percentages[$i] ?? 0);
 
-        if ($raw === '') {
-            throw new Exception('Xammal seçilməyib.');
-        }
 
-        if ($percentage <= 0) {
-            throw new Exception($raw . ' üçün faiz düzgün deyil.');
-        }
-
-        $totalPercent += $percentage;
-
-    }
-
-    if ($totalPercent > 100) {
-        throw new Exception('Faizlərin cəmi 100%-dən çox ola bilməz.');
-    }
 
     $pdo->beginTransaction();
 
-    $stmt = $pdo->prepare("
-        UPDATE sauce_recipes
-        SET
-            name=?,
-            type=?,
-            loss=?
-        WHERE id=?
-    ");
+    $check = $pdo->prepare("
+    SELECT COUNT(*)
+    FROM flavour_recipes
+    WHERE
+        name = ?
+        AND id <> ?
+");
 
-    $stmt->execute([
+    $check->execute([
         $name,
-        $type,
-        $loss,
         $recipeId
     ]);
 
-    $stmt = $pdo->prepare("
-        DELETE FROM sauce_recipe_items
-        WHERE recipe_id=?
-    ");
+    if ($check->fetchColumn() > 0) {
+        throw new Exception('Bu adda resept artıq mövcuddur');
+    }
 
-    $stmt->execute([$recipeId]);
+
+
+
+    $checkMaterial = $pdo->prepare("
+    SELECT COUNT(*)
+    FROM raw_materials
+    WHERE
+        name = ?
+        AND type IN ('flavour','raw')
+");
+
+
+
+    $stmt = $pdo->prepare("
+    UPDATE flavour_recipes
+    SET
+        name = ?,
+        sauce_type = ?
+    WHERE id = ?
+");
+
+    $stmt->execute([
+        $name,
+        $sauceType,
+        $recipeId
+    ]);
+
+
+    $totalPercent = 0;
+
+    $pdo->prepare("
+        DELETE FROM flavour_recipe_items
+        WHERE recipe_id = ?
+    ")->execute([$recipeId]);
 
     $insertItem = $pdo->prepare("
-        INSERT INTO sauce_recipe_items
+        INSERT INTO flavour_recipe_items
         (
             recipe_id,
-            raw_material_name,
+            flavour_name,
             percentage
         )
         VALUES
@@ -150,14 +126,48 @@ try {
         )
     ");
 
-    foreach ($raw_name as $i => $raw) {
+    $cleanMaterials = array_map('trim', $materialNames);
+
+    if (count($cleanMaterials) !== count(array_unique($cleanMaterials))) {
+        throw new Exception('Eyni xammal bir reseptdə yalnız bir dəfə istifadə edilə bilər');
+    }
+
+    foreach ($materialNames as $i => $materialName) {
+
+        $materialName = trim($materialName);
+        $percentage = (float) ($percentages[$i] ?? 0);
+
+        if ($materialName === '') {
+            throw new Exception('Xammal seçilməyib');
+        }
+
+        if ($percentage <= 0) {
+            throw new Exception(
+                $materialName . ' üçün faiz düzgün deyil'
+            );
+        }
+
+
+        $checkMaterial->execute([$materialName]);
+
+        if (!$checkMaterial->fetchColumn()) {
+            throw new Exception($materialName . ' tapılmadı');
+        }
+
+
+        $totalPercent += $percentage;
 
         $insertItem->execute([
             $recipeId,
-            trim($raw),
-            (float) $percentages[$i]
+            $materialName,
+            $percentage
         ]);
+    }
 
+    if ($totalPercent > 100) {
+        throw new Exception(
+            'Faizlərin cəmi 100%-dən çox ola bilməz'
+        );
     }
 
     $pdo->commit();
@@ -176,5 +186,4 @@ try {
         'success' => false,
         'message' => $e->getMessage()
     ], JSON_UNESCAPED_UNICODE);
-
 }
