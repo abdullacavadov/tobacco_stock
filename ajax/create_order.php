@@ -58,23 +58,24 @@ try {
     $pdo->beginTransaction();
 
     $insertStmt = $pdo->prepare("
-        INSERT INTO orders
-        (
-            order_no,
-            name,
-            weight,
-            qty,
-            type,
-            cost,
-            sell_price,
-            production_date,
-            kind,
-            customer
-        )
-        VALUES
-        (
-            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-        )
+    INSERT INTO orders
+    (
+        order_no,
+        item_id,
+        name,
+        weight,
+        qty,
+        type,
+        cost,
+        sell_price,
+        production_date,
+        kind,
+        customer
+    )
+    VALUES
+    (
+        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+    )
     ");
 
     foreach ($items as $item) {
@@ -119,6 +120,7 @@ try {
             throw new Exception('Məhsul stokda yoxdur.');
         }
 
+        $item_id = $id;
         switch ($kind) {
 
             case 'raw':
@@ -135,8 +137,8 @@ try {
                     );
                 }
 
-                $cost = $product['price'] / $stock;
-                $allCost = $cost * $qty;
+                $unitCost = (float)$product['price'] / (float)$stock;
+                $totalCost = $unitCost* $qty;
 
                 $name = $product['name'];
                 $type = '';
@@ -158,8 +160,8 @@ try {
                     );
                 }
 
-                $cost = $product['price'] / $stock;
-                $allCost = $cost * $qty;
+                $unitCost= (float)$product['price'] / (float)$stock;
+                $totalCost = $unitCost * $qty;
 
                 $name = $product['type'] == 'premium'
                     ? 'Premium sous'
@@ -184,8 +186,8 @@ try {
                     );
                 }
 
-                $cost = $product['cost'] / $stock;
-                $allCost = $cost * $qty;
+                $unitCost = (float)$product['price'] / (float)$stock;
+                $totalCost = $unitCost * $qty;
 
                 $type = $product['sauce_type'];
 
@@ -215,10 +217,10 @@ try {
                     );
                 }
 
-                $cost = (float) $product['price'];
+                $unitCost= (float) $product['price'];
 
                 // products cədvəlində ümumi maya dəyişmir
-                $allCost = 0;
+                $totalCost = 0;
 
                 $name = $product['name'];
                 $type = $product['type'];
@@ -230,7 +232,7 @@ try {
 
         if ($sellPrice < $cost) {
             throw new Exception(
-                $name . ': satış qiyməti maya dəyərindən azdır. Miqdarın mayası: ' . $cost . '₼'
+                $name . ': satış qiyməti maya dəyərindən azdır. Miqdarın mayası: ' . $unitCost. '₼'
             );
         }
 
@@ -251,7 +253,7 @@ try {
 
             $stmt->execute([
                 $qty,
-                $allCost,
+                $totalCost,
                 $id
             ]);
 
@@ -278,6 +280,7 @@ try {
 
         $insertStmt->execute([
             $order_no,
+            $item_id,
             $name,
             $weight,
             $qty,

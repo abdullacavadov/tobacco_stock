@@ -3,8 +3,6 @@
 require '../inc/db.php';
 
 
-$pid = $_GET['pid'];
-
 $pid = (int) ($_GET['pid'] ?? 0);
 
 if ($pid <= 0) {
@@ -15,7 +13,7 @@ $pdo->beginTransaction();
 
 try {
     $stmt = $pdo->prepare("
-    SELECT id
+    SELECT id, is_active
     FROM products
     WHERE id = ?
     FOR UPDATE
@@ -27,6 +25,9 @@ try {
         throw new Exception('Məhsul tapılmadı.');
     }
 
+    if ((int) $product['is_active'] === 0) {
+        throw new Exception('Məhsul artıq silinib.');
+    }
 
 
     $stmt = $pdo->prepare("
@@ -44,8 +45,8 @@ try {
 
     $stmt = $pdo->prepare("
     UPDATE raw_materials
-    SET stock = ROUND(stock + ?, 4),
-        price = ROUND(price + ?, 4)
+    SET stock = stock + ?,
+        price = price + ?
     WHERE id = ?
 ");
 
@@ -94,7 +95,8 @@ try {
     }
 
     $stmt = $pdo->prepare("
-    DELETE FROM products
+    UPDATE products
+    SET is_active = 0
     WHERE id = ?
 ");
 
