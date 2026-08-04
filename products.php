@@ -4,17 +4,18 @@
 require 'inc/db.php';
 
 $productTotalCost = $pdo
-    ->query("SELECT COALESCE(SUM(stock*price), 0) FROM products")
+    ->query("SELECT COALESCE(SUM(stock*price), 0) FROM products WHERE is_active = 1")
     ->fetchColumn();
 
 $productTotalStock = $pdo
-    ->query("SELECT COALESCE(SUM(stock), 0) FROM products")
+    ->query("SELECT COALESCE(SUM(stock), 0) FROM products WHERE is_active = 1")
     ->fetchColumn();
 
 $products = $pdo
     ->query("
 SELECT *
 FROM products
+WHERE is_active = 1
 ORDER BY in_stock DESC, stock DESC
 ")
     ->fetchAll();

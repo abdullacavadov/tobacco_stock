@@ -109,9 +109,9 @@ ORDER BY created_at DESC
                                             </td>
 
                                             <td>
-                                                <?= (float) $flavour['cost'] / $flavour['qty']; ?> ₼
+                                                <?= number_format((float) $flavour['cost'] / $flavour['qty'], 3, ',', ' '); ?> ₼
                                                 <br>
-                                                <small><b>(Cəmi: <?= $flavour['cost']; ?> ₼)</b></small>
+                                                <small><b>(Cəmi: <?= number_format((float) $flavour['cost'], 3, ',', ' '); ?> ₼)</b></small>
                                             </td>
 
                                             <td>

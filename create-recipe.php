@@ -84,7 +84,7 @@
 
                                 <div class="mt-3">
                                     <button type="button" class="btn btn-secondary" id="addFlavour">
-                                        + Dad əlavə et
+                                        + Material əlavə et
                                     </button>
                                 </div>
 

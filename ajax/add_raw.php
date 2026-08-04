@@ -45,7 +45,7 @@ if ($type == 'raw') {
     $unit = 'əd';
 }
 
-$statement = $pdo->prepare("INSERT INTO raw_materials (name, type, stock, unit, price, supplier, description) VALUES (?,?,?,?,?,?)");
+$statement = $pdo->prepare("INSERT INTO raw_materials (name, type, stock, unit, price, supplier, description) VALUES (?,?,?,?,?,?,?)");
 $statement->execute([$name, $type, $stock, $unit, $price, $supplier, $description]);
 
 

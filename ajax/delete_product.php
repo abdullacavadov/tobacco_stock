@@ -21,7 +21,9 @@ try {
 
     $stmt->execute([$pid]);
 
-    if (!$stmt->fetch()) {
+    $product = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$product) {
         throw new Exception('Məhsul tapılmadı.');
     }
 
@@ -37,7 +39,6 @@ try {
         qty
     FROM product_material_usage
     WHERE product_id = ?
-    FOR UPDATE
 ");
 
     $stmt->execute([$pid]);
@@ -45,8 +46,9 @@ try {
 
     $stmt = $pdo->prepare("
     UPDATE raw_materials
-    SET stock = stock + ?,
-        price = price + ?
+    SET
+        stock = ROUND(stock + ?, 4),
+        price = ROUND(price + ?, 4)
     WHERE id = ?
 ");
 
@@ -70,7 +72,6 @@ try {
         cost
     FROM product_flavour_sauce_usage
     WHERE product_id = ?
-    FOR UPDATE
 ");
 
     $stmt->execute([$pid]);
@@ -102,10 +103,22 @@ try {
 
     $stmt->execute([$pid]);
 
-
-    if ($stmt->rowCount() === 0) {
+    if ($stmt->rowCount() !== 1) {
         throw new Exception('Məhsul silinmədi.');
     }
+
+    $stmt = $pdo->prepare("
+    DELETE FROM product_material_usage
+    WHERE product_id = ?
+");
+    $stmt->execute([$pid]);
+
+    $stmt = $pdo->prepare("
+    DELETE FROM product_flavour_sauce_usage
+    WHERE product_id = ?
+");
+    $stmt->execute([$pid]);
+
 
     $pdo->commit();
 

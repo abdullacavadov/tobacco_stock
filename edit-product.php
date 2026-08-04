@@ -72,72 +72,8 @@ $production_date = $product['production_date'];
                             <input type="hidden" name="pid" value="<?= htmlspecialchars($pid) ?>">
 
                                 <div class="row">
-
-                                    <div class="col-md-9 mb-3">
-                                        <div class="form-floating">
-                                            <select class="form-control" id="name" name="name">
-
-                                                <?php
-
-                                                $stmt = $pdo->query("
-                                                    SELECT
-                                                        *
-                                                    FROM sauce_with_flavour 
-                                                    WHERE qty > 0 
-                                                    ORDER BY created_at DESC
-                                                ");
-
-                                                $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                                                ?>
-
-                                                <?php foreach ($rows as $row): ?>
-
-                                                    <option value="<?= htmlspecialchars($row['flavour_name']) ?>"
-                                                    <?= $row['flavour_name'] === $name ? ' selected' : '' ?>
-                                                    >
-                                                        <?= htmlspecialchars(
-                                                            $row['flavour_name'] .
-                                                            " (" .
-                                                            $row['sauce_type'] .
-                                                            ", stokda: " .
-                                                            number_format((float) $row['qty'], 2, '.', '') .
-                                                            " kq)"
-                                                        ) ?>
-                                                    </option>
-
-                                                <?php endforeach; ?>
-                                            </select>
-                                            <label for="name">Dad</label>
-                                        </div>
-                                    </div>
-
-
-                                    <div class="col-md-3 mb-3">
-                                        <div class="form-floating">
-                                            <input class="form-control" id="weight" name="weight" value="<?= htmlspecialchars($product['weight']*1000) ?>" />
-                                            <label for="weight">Qablaşma həcmi (qr)</label>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-3 mb-3">
-                                        <div class="form-floating">
-                                            <select class="form-control" id="type" name="type">
-                                                <option value="premium" <?= $product['type'] === 'premium' ? 'selected' : '' ?>>Qırmızı</option>
-                                                <option value="strong" <?= $product['type'] === 'strong' ? 'selected' : '' ?>>Qara</option>
-                                            </select>
-                                            <label for="type">Məhsulun növü</label>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-3 mb-3">
-                                        <div class="form-floating">
-                                            <input class="form-control" id="price" name="price" type="number" step="0.01"
-                                                placeholder="100 AZN" value="<?= htmlspecialchars($product['price']) ?>" />
-                                            <label for="price">Vahidin mayası (AZN)</label>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-3 mb-3">
+                                    
+                                    <div class="col-md-6 mb-3">
                                         <div class="form-floating">
                                             <input class="form-control" id="stock" name="stock" type="number" step="1"
                                                 placeholder="100 kq" value="<?= htmlspecialchars($product['stock']) ?>" />
@@ -145,7 +81,7 @@ $production_date = $product['production_date'];
                                         </div>
                                     </div>
 
-                                    <div class="col-md-3 mb-3">
+                                    <div class="col-md-6 mb-3">
                                         <div class="form-floating">
                                             <input class="form-control" id="production_date" name="production_date" type="date"
                                                 placeholder="100 kq" value="<?= htmlspecialchars($product['production_date']) ?>" />
