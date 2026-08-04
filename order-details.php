@@ -211,17 +211,17 @@ $orderInfo = $orders[0];
                             <div class="alert alert-info">
                                 <strong>
                                     Cəmi maya dəyəri:
-                                    <?= number_format((float) $totalCost, 3, ',', ' '); ?> AZN
+                                    <?= number_format((float) $totalCost, 3, ',', ' '); ?> ₼
                                 </strong>
                                 <br>
                                 <strong>
                                     Cəmi satş həcmi:
-                                    <?= number_format((float) $totalRevenue, 3, ',', ' '); ?> kq
+                                    <?= number_format((float) $totalRevenue, 3, ',', ' '); ?> ₼
                                 </strong>
                                 <br>
                                 <strong>
                                     Cəmi qazanc:
-                                    <?= number_format((float) $totalProfit, 3, ',', ' '); ?> kq
+                                    <?= number_format((float) $totalProfit, 3, ',', ' '); ?> ₼
                                 </strong>
                             </div>
 

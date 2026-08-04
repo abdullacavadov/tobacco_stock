@@ -2,55 +2,143 @@
 
 require '../inc/db.php';
 
-header('Content-Type: application/json; charset=utf-8');
+
+$orderNo = $_POST['oid'] ?? 0;
+
+if ($orderNo <= 0) {
+    throw new Exception('Yanlış satış ID-si.');
+}
+
+
+$items = $_POST['items'] ?? [];
+$custName = trim($_POST['customer'] ?? '');
+
+if (empty($items)) {
+    throw new Exception('Ən azı bir məhsul seçilməlidir.');
+}
+
+if ($custName === '') {
+    throw new Exception('Gələcək analizlər üçün müştəri adı qeyd etmək tövsiyyə olunur.');
+}
+
+$config = [
+
+    'raw' => [
+        'table' => 'raw_materials',
+        'stockField' => 'stock',
+        'moneyField' => 'price',
+        'hasMoney' => true
+    ],
+
+    'sauce' => [
+        'table' => 'sauce_stock',
+        'stockField' => 'stock',
+        'moneyField' => 'price',
+        'hasMoney' => true
+    ],
+
+    'flavour' => [
+        'table' => 'sauce_with_flavour',
+        'stockField' => 'qty',
+        'moneyField' => 'cost',
+        'hasMoney' => true
+    ],
+
+    'product' => [
+        'table' => 'products',
+        'stockField' => 'stock',
+        'hasMoney' => false
+    ]
+
+];
+
+$pdo->beginTransaction();
 
 try {
 
-    $items = $_POST['items'] ?? [];
-    $custName = trim($_POST['customer'] ?? '');
-    $order_no = date('YmdHis') . random_int(1000, 9999);
 
-    if (empty($items)) {
-        throw new Exception('Ən azı bir məhsul seçilməlidir.');
+    $stmt = $pdo->prepare("
+    SELECT *
+    FROM orders
+    WHERE order_no = ?
+    FOR UPDATE
+");
+
+    $stmt->execute([$orderNo]);
+
+    $orders = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    if (!$orders) {
+        throw new Exception('Belə bir satış tapılmadı.');
     }
 
-    if ($custName === '') {
-        throw new Exception('Gələcək analizlər üçün müştəri adı qeyd etmək tövsiyyə olunur.');
+
+
+
+
+    foreach ($orders as $order) {
+
+        $cfg = $config[$order['kind']];
+
+        if ($cfg['hasMoney']) {
+
+            $totalCost = $order['qty'] * $order['cost'];
+
+            $sql = "
+            UPDATE {$cfg['table']}
+            SET
+                {$cfg['stockField']} = {$cfg['stockField']} + ?,
+                {$cfg['moneyField']} = {$cfg['moneyField']} + ?
+            WHERE id = ?
+        ";
+
+            $stmt = $pdo->prepare($sql);
+
+            $stmt->execute([
+                $order['qty'],
+                $totalCost,
+                $order['item_id']
+            ]);
+
+            if ($stmt->rowCount() === 0) {
+                throw new Exception('Stok qeydi tapılmadı.');
+            }
+
+        } else {
+
+            $sql = "
+            UPDATE {$cfg['table']}
+            SET
+                {$cfg['stockField']} = {$cfg['stockField']} + ?
+            WHERE id = ?
+        ";
+
+            $stmt = $pdo->prepare($sql);
+
+            $stmt->execute([
+                $order['qty'],
+                $order['item_id']
+            ]);
+
+            if ($stmt->rowCount() === 0) {
+                throw new Exception('Stok qeydi tapılmadı.');
+            }
+
+        }
+
     }
 
-    $config = [
 
-        'raw' => [
-            'table' => 'raw_materials',
-            'stockField' => 'stock',
-            'moneyField' => 'price',
-            'hasMoney' => true
-        ],
 
-        'sauce' => [
-            'table' => 'sauce_stock',
-            'stockField' => 'stock',
-            'moneyField' => 'price',
-            'hasMoney' => true
-        ],
+    $stmt = $pdo->prepare("
+    DELETE
+    FROM orders
+    WHERE order_no = ?
+");
 
-        'flavour' => [
-            'table' => 'sauce_with_flavour',
-            'stockField' => 'qty',
-            'moneyField' => 'cost',
-            'hasMoney' => true
-        ],
+    $stmt->execute([$orderNo]);
 
-        'product' => [
-            'table' => 'products',
-            'stockField' => 'stock',
-            'moneyField' => 'price',
-            'hasMoney' => false
-        ]
 
-    ];
-
-    $pdo->beginTransaction();
 
     $insertStmt = $pdo->prepare("
     INSERT INTO orders
@@ -72,6 +160,7 @@ try {
         ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
     )
     ");
+
 
     foreach ($items as $item) {
 
@@ -132,8 +221,8 @@ try {
                     );
                 }
 
-                $unitCost = (float)$product['price'] / (float)$stock;
-                $totalCost = $unitCost* $qty;
+                $unitCost = (float) $product['price'] / (float) $stock;
+                $totalCost = $unitCost * $qty;
 
                 $name = $product['name'];
                 $type = '';
@@ -155,7 +244,7 @@ try {
                     );
                 }
 
-                $unitCost= (float)$product['price'] / (float)$stock;
+                $unitCost = (float) $product['price'] / (float) $stock;
                 $totalCost = $unitCost * $qty;
 
                 $name = $product['type'] == 'premium'
@@ -212,7 +301,7 @@ try {
                     );
                 }
 
-                $unitCost= (float) $product['price'];
+                $unitCost = (float) $product['price'];
 
                 // products cədvəlində ümumi maya dəyişmir
                 $totalCost = 0;
@@ -227,7 +316,7 @@ try {
 
         if ($sellPrice < $unitCost) {
             throw new Exception(
-                $name . ': satış qiyməti maya dəyərindən azdır. Miqdarın mayası: ' . $unitCost. '₼'
+                $name . ': satış qiyməti maya dəyərindən azdır. Miqdarın mayası: ' . $unitCost . '₼'
             );
         }
 
@@ -274,7 +363,7 @@ try {
         // Satışı qeyd et
 
         $insertStmt->execute([
-            $order_no,
+            $orderNo,
             $item_id,
             $name,
             $weight,
@@ -287,7 +376,11 @@ try {
             $custName
         ]);
 
-    } // foreach sonu
+    }
+
+
+
+
 
 
     $pdo->commit();
@@ -295,16 +388,14 @@ try {
     echo json_encode([
         'success' => true
     ], JSON_UNESCAPED_UNICODE);
-
-} catch (Throwable $e) {
+} catch (Exception $e) {
 
     if ($pdo->inTransaction()) {
         $pdo->rollBack();
     }
 
-    echo json_encode([
-        'success' => false,
-        'message' => $e->getMessage()
-    ], JSON_UNESCAPED_UNICODE);
-
+    throw new Exception($e->getMessage());
 }
+
+
+
