@@ -174,12 +174,12 @@ $totalProfit = 0;
                                 <br>
                                 <strong>
                                     Cəmi satş həcmi:
-                                    <?= number_format((float) $orderTotalPrice, 3, ',', ' '); ?> kq
+                                    <?= number_format((float) $orderTotalPrice, 3, ',', ' '); ?> AZN
                                 </strong>
                                 <br>
                                 <strong>
                                     Cəmi qazanc:
-                                    <?= number_format((float) $fullProfit, 3, ',', ' '); ?> kq
+                                    <?= number_format((float) $fullProfit, 3, ',', ' '); ?> AZN
                                 </strong>
                             </div>
 

@@ -179,9 +179,9 @@ $products = $pdo
                                             </td>
 
                                             <td>
-                                                <?= $item['price'] / $item['stock']; ?> ₼
+                                                <?= number_format($item['price'] / $item['stock'], 3, ',', ' '); ?> ₼
                                                 <br>
-                                                <small><b>(Cəmi: <?= (float) $item['price']; ?>
+                                                <small><b>(Cəmi: <?= number_format((float) $item['price'], 3, ',', ' '); ?>
                                                         ₼)</b></small>
                                             </td>
 

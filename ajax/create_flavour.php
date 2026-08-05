@@ -310,6 +310,56 @@ try {
         $cost
     ]);
 
+    $sauceFlavourId = (int) $pdo->lastInsertId();
+
+
+
+    $insertMaterialUsage = $pdo->prepare("
+    INSERT INTO sauce_flavour_material_usage
+(
+    sauce_flavour_id,
+    material_id,
+    qty,
+    cost
+)
+VALUES (?,?,?,?)
+    ");
+
+
+    foreach ($materialPlan as $row) {
+
+        $insertMaterialUsage->execute([
+            $sauceFlavourId,
+            $row['id'],
+            $row['used'],
+            $row['used_cost']
+        ]);
+
+    }
+
+
+    $insertSauceUsage = $pdo->prepare("
+        INSERT INTO sauce_flavour_sauce_usage
+            (
+                sauce_flavour_id,
+                sauce_stock_id,
+                qty,
+                cost
+            )
+            VALUES (?,?,?,?)
+    ");
+
+    foreach ($saucePlan as $row) {
+
+        $insertSauceUsage->execute([
+            $sauceFlavourId,
+            $row['id'],
+            $row['used'],
+            $row['used_cost']
+        ]);
+
+    }
+
     $pdo->commit();
 
     echo json_encode([
