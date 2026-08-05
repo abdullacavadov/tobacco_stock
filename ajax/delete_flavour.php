@@ -61,11 +61,13 @@ try {
             $row['material_id']
         ]);
 
+        if ($stmt->rowCount() !== 1) {
+            throw new Exception('Material geri qaytarılmadı.');
+        }
+
     }
 
-    if ($stmt->rowCount() !== 1) {
-        throw new Exception('Material geri qaytarılmadı.');
-    }
+
 
 
     /*SAUCES */
@@ -98,11 +100,13 @@ try {
             $row['sauce_stock_id']
         ]);
 
+        if ($stmt->rowCount() !== 1) {
+            throw new Exception('Sous geri qaytarılmadı.');
+        }
+
     }
 
-    if ($stmt->rowCount() !== 1) {
-        throw new Exception('Sous geri qaytarılmadı.');
-    }
+
 
 
     $stmt = $pdo->prepare("
@@ -125,8 +129,6 @@ try {
     if ($stmt->rowCount() !== 1) {
         throw new Exception('Məhsul silinmədi.');
     }
-
-
 
 
     $pdo->commit();

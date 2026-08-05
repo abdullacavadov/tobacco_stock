@@ -9,12 +9,12 @@ try {
     $type = trim($_POST['type'] ?? '');
     $kg = (float) ($_POST['stock'] ?? 0);
 
+    if ($recipeId <= 0) {
+        throw new Exception('Yanlış resept ID-si');
+    }
+
     if ($kg <= 0) {
-        echo json_encode([
-            'success' => false,
-            'message' => 'Yanlış miqdar'
-        ], JSON_UNESCAPED_UNICODE);
-        exit();
+        throw new Exception('Yanlış miqdar');
     }
 
     if (!in_array($type, ['premium', 'strong'])) {
@@ -68,7 +68,7 @@ try {
     }
 
     $cost = 0;
-
+    $materialPlan = [];
 
 
 
@@ -107,7 +107,6 @@ try {
                 $totalStock .
                 ' kq'
             );
-            exit();
         }
 
         $remaining = $required;
@@ -129,6 +128,13 @@ try {
 
             // Ümumi maya dəyərinə əlavə et
             $cost += $usedPrice;
+
+            // Sonradan bərpa/edit üçün yadda saxla
+            $materialPlan[] = [
+                'id' => $stockRow['id'],
+                'used' => $used,
+                'used_cost' => $usedPrice
+            ];
 
             // Yeni qalıqlar
             $newStock = round($stockRow['stock'] - $used, 4);
@@ -176,8 +182,42 @@ try {
     $stmt->execute([
         $type,
         $kg,
-        round($cost, 2)
+        round($cost, 4)
     ]);
+
+    $sauceId = $pdo->lastInsertId();
+
+
+    $insertMaterialUsage = $pdo->prepare("
+        INSERT INTO sauce_material_usage
+        (
+            sauce_id,
+            material_id,
+            qty,
+            cost
+        )
+        VALUES
+        (
+            ?, ?, ?, ?
+        )
+    ");
+
+    foreach ($materialPlan as $row) {
+
+        $insertMaterialUsage->execute([
+            $sauceId,
+            $row['id'],
+            $row['used'],
+            $row['used_cost']
+        ]);
+
+    }
+
+
+    if (!$sauceId) {
+        throw new Exception('Sous yaradılmadı.');
+    }
+
 
     $pdo->commit();
 
