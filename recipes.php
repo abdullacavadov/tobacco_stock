@@ -14,6 +14,7 @@ $stmt = $pdo->query("
     FROM flavour_recipes r
     LEFT JOIN flavour_recipe_items i
         ON i.recipe_id = r.id
+    WHERE r.is_active = 1
     ORDER BY r.name, i.flavour_name
 ");
 

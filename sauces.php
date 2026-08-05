@@ -113,9 +113,9 @@ ORDER BY created_at DESC
                                             </td>
 
                                             <td>
-                                                <?= (float) $sauce['price'] / $sauce['stock']; ?> ₼
+                                                <?= number_format((float) $sauce['price'] / $sauce['stock'], 3, ',', ' '); ?> ₼
                                                 <br>
-                                                <small><b>(Cəmi: <?= $sauce['price']; ?> ₼)</b></small>
+                                                <small><b>(Cəmi: <?= number_format((float) $sauce['price'], 3, ',', ' '); ?> ₼)</b></small>
                                             </td>
 
                                             <td>

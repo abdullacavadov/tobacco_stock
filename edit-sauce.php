@@ -14,8 +14,9 @@ $statement->execute([$sauce_id]);
 $sauce = $statement->fetch(PDO::FETCH_ASSOC);
 
 $sauce_stock = $sauce['stock'];
-$sauce_type = $sauce['type']; 
+$sauce_type = $sauce['type'];
 $sauce_price = $sauce['price'];
+$recipe_id = $sauce['recipe_id'];
 
 ?>
 
@@ -62,7 +63,8 @@ $sauce_price = $sauce['price'];
                         <div class="card-body">
                             <form id="sauce_edit">
 
-                                <input type="hidden" name="id" value="<?= $sauce_id; ?>">
+                                <input type="hidden" name="sid" value="<?= $sauce_id; ?>">
+                                <input type="hidden" name="recipe_id" value="<?= $recipe_id; ?>">
 
 
                                 <div class="row">
@@ -84,7 +86,8 @@ $sauce_price = $sauce['price'];
                                     <div class="col-md-4">
                                         <div class="form-floating">
                                             <input class="form-control" id="stock" name="stock" type="number"
-                                                step="0.0001" min="0.0001" placeholder="100 kq" value="<?= $sauce_stock; ?>" />
+                                                step="0.0001" min="0.0001" placeholder="100 kq"
+                                                value="<?= $sauce_stock; ?>" />
                                             <label for="stock">Həcm (kq)</label>
                                         </div>
                                     </div>
@@ -93,7 +96,8 @@ $sauce_price = $sauce['price'];
                                     <div class="col-md-4">
                                         <div class="form-floating">
                                             <input class="form-control" id="price" name="price" type="number"
-                                                step="0.0001" min="0.0001" placeholder="100 ₼" value="<?= $sauce_price; ?>" />
+                                                step="0.0001" min="0.0001" placeholder="100 ₼"
+                                                value="<?= $sauce_price; ?>" disabled />
                                             <label for="price">Ümumi həcmin qiyməti (AZN)</label>
                                         </div>
                                     </div>
@@ -152,24 +156,22 @@ $sauce_price = $sauce['price'];
                     body: formData
                 })
 
-                    .then(response => response.text())
+                    .then(response => response.json())
+                    .then(data => {
 
-                    .then(response => {
-
-                        if (response.trim() === "success") {
+                        if (data.success) {
 
                             Swal.fire({
-                                title: "Sous həcmi uğurla yeniləndi.",
-                                icon: "success",
-                                draggable: true
+                                title: "Sous redaktə edildi.",
+                                icon: "success"
                             });
+
                         } else {
 
                             Swal.fire({
                                 title: "Xəta baş verdi",
-                                text: response,
-                                icon: "error",
-                                draggable: true
+                                text: data.message,
+                                icon: "error"
                             });
 
                         }

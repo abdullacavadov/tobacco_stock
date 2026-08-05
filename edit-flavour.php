@@ -232,7 +232,7 @@ foreach ($rows as $row) {
                         if (data.success) {
 
                             Swal.fire({
-                                title: "Məhsul redaktə edildi.",
+                                title: "Aromalı sous redaktə edildi.",
                                 icon: "success"
                             });
 

@@ -174,12 +174,12 @@ $products = $pdo
                                             </td>
 
                                             <td>
-                                                <?= $item['stock'] . ' ' . $item['unit'] ?>
+                                                <?= number_format((float) $item['stock'], 3, ',', ' ') . ' ' . $item['unit'] ?>
 
                                             </td>
 
                                             <td>
-                                                <?= number_format($item['price'] / $item['stock'], 3, ',', ' '); ?> ₼
+                                                <?= number_format((float) $item['price'] / $item['stock'], 3, ',', ' '); ?> ₼
                                                 <br>
                                                 <small><b>(Cəmi: <?= number_format((float) $item['price'], 3, ',', ' '); ?>
                                                         ₼)</b></small>

@@ -168,11 +168,13 @@ try {
         INSERT INTO sauce_stock
         (
             type,
+            recipe_id,
             stock,
             price
         )
         VALUES
         (
+            ?,
             ?,
             ?,
             ?
@@ -181,6 +183,7 @@ try {
 
     $stmt->execute([
         $type,
+        $recipeId,
         $kg,
         round($cost, 4)
     ]);

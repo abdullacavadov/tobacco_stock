@@ -296,6 +296,7 @@ try {
         INSERT INTO sauce_with_flavour
         (
             sauce_type,
+            recipe_id,
             flavour_name,
             qty,
             cost,
@@ -307,12 +308,14 @@ try {
             ?,
             ?,
             ?,
+            ?,
             NOW()
         )
         ");
 
     $stmt->execute([
         $sauce_type,
+        $recipe_id,
         $recipe['name'],
         $qty,
         $cost

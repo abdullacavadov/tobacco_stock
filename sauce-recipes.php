@@ -15,6 +15,7 @@ $stmt = $pdo->query("
     FROM sauce_recipes r
     LEFT JOIN sauce_recipe_items i
         ON i.recipe_id = r.id
+    WHERE r.is_active = 1
     ORDER BY r.name, i.raw_material_name
 ");
 
@@ -128,9 +129,9 @@ foreach ($rows as $row) {
 
                                                     <b style="width: 400px">
                                                         <?= htmlspecialchars($recipe['name']); ?>
-                                                        <?php if($recipe['loss'] > 0){
+                                                        <?php if ($recipe['loss'] > 0) {
                                                             echo ' (<i class="fa-solid fa-bong"></i> itki: ' . number_format($recipe['loss'], 2) . '%)';
-                                                        }  ?>
+                                                        } ?>
                                                     </b>
 
 
