@@ -260,6 +260,10 @@ try {
             $row['id']
         ]);
 
+        if ($updateSauce->rowCount() !== 1) {
+            throw new Exception('Sous stokdan çıxarılmadı.');
+        }
+
     }
 
 
@@ -278,6 +282,10 @@ try {
             $row['used_cost'],
             $row['id']
         ]);
+
+        if ($updateMaterial->rowCount() !== 1) {
+            throw new Exception('Material stokdan çıxarılmadı.');
+        }
 
     }
 
@@ -335,6 +343,10 @@ VALUES (?,?,?,?)
             $row['used_cost']
         ]);
 
+        if ($insertMaterialUsage->rowCount() !== 1) {
+            throw new Exception('Material istifadəsi əlavə olunmadı.');
+        }
+
     }
 
 
@@ -357,6 +369,10 @@ VALUES (?,?,?,?)
             $row['used'],
             $row['used_cost']
         ]);
+
+        if ($insertSauceUsage->rowCount() !== 1) {
+            throw new Exception('Sous istifadəsi əlavə olunmadı.');
+        }
 
     }
 

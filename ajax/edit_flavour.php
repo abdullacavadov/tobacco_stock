@@ -4,37 +4,140 @@ require '../inc/db.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
-if (!isset($_POST['fid'])) {
-    echo json_encode([
-        'success' => false,
-        'message' => 'Sous ID-si göndərilməyib'
-    ], JSON_UNESCAPED_UNICODE);
-    exit();
+$fid = (int) ($_POST['fid'] ?? 0);
+
+if ($fid <= 0) {
+    throw new Exception('Yanlış sous ID-si.');
 }
 
+$qty = (float) ($_POST['qty'] ?? 0);
+$sauce_type = $_POST['sauce_type'] ?? '';
+$saucePlan = [];
+$materialPlan = [];
+$cost = 0;
+
+if ($qty <= 0) {
+    throw new Exception('Sous həcmi qeyri-müəyyəndir.');
+}
+
+if (empty($sauce_type)) {
+    throw new Exception('Sous növü seçilməyib.');
+}
+
+
+
+$pdo->beginTransaction();
+
 try {
-    $fid = (int) $_POST['fid'];
-    $sauce_type = trim($_POST['sauce_type'] ?? '');
-    $qty = (float) ($_POST['qty'] ?? 0);
+    $stmt = $pdo->prepare("
+        SELECT id
+        FROM sauce_with_flavour
+        WHERE id = ?
+        FOR UPDATE
+    ");
+
+    $stmt->execute([$fid]);
+
+    $fl_sauce = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$fl_sauce) {
+        throw new Exception('Sous tapılmadı.');
+    }
+
+
+
+    /* MATERIALS */
+    $stmt = $pdo->prepare("
+        SELECT
+            material_id,
+            cost,
+            qty
+        FROM sauce_flavour_material_usage
+        WHERE sauce_flavour_id = ?
+        FOR UPDATE
+    ");
+
+    $stmt->execute([$fid]);
+    $materials = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $stmt = $pdo->prepare("
+        UPDATE raw_materials
+        SET
+            stock = ROUND(stock + ?, 4),
+            price = ROUND(price + ?, 4)
+        WHERE id = ?
+    ");
+
+    foreach ($materials as $row) {
+
+        $stmt->execute([
+            $row['qty'],
+            $row['cost'],
+            $row['material_id']
+        ]);
+
+        if ($stmt->rowCount() !== 1) {
+            throw new Exception('Material geri qaytarılmadı.');
+        }
+
+    }
+
+
+    /*SAUCES */
+    $stmt = $pdo->prepare("
+        SELECT
+            sauce_stock_id,
+            qty,
+            cost
+        FROM sauce_flavour_sauce_usage
+        WHERE sauce_flavour_id = ?
+        FOR UPDATE
+    ");
+
+    $stmt->execute([$fid]);
+    $sauces = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    $stmt = $pdo->prepare("
+        UPDATE sauce_stock
+        SET
+            stock = ROUND(stock + ?, 4),
+            price = ROUND(price + ?, 4)
+        WHERE id = ?
+    ");
+
+    foreach ($sauces as $row) {
+
+        $stmt->execute([
+            $row['qty'],
+            $row['cost'],
+            $row['sauce_stock_id']
+        ]);
+
+        if ($stmt->rowCount() !== 1) {
+            throw new Exception('Sous geri qaytarılmadı.');
+        }
+
+    }
+
+    $stmt = $pdo->prepare("
+        DELETE FROM sauce_flavour_sauce_usage
+        WHERE sauce_flavour_id = ?
+    ");
+    $stmt->execute([$fid]);
+
+    $stmt = $pdo->prepare("
+        DELETE FROM sauce_flavour_material_usage
+        WHERE sauce_flavour_id = ?
+    ");
+    $stmt->execute([$fid]);
+
+
     $recipe_id = (int) ($_POST['recipe_id'] ?? 0);
-    $cost = (float) ($_POST['cost'] ?? 0);
-
-
-    if (!in_array($sauce_type, ['premium', 'strong'])) {
-        throw new Exception('Yanlış sous növü');
-    }
-
-    if ($qty <= 0) {
-        throw new Exception('Yanlış miqdar');
-    }
 
     if ($recipe_id <= 0) {
-        throw new Exception('Resept seçilməyib');
+        throw new Exception('Resept seçilməyib.');
     }
 
-    if ($cost <= 0) {
-        throw new Exception('Yanlış qiymət');
-    }
 
     $stmt = $pdo->prepare("
         SELECT
@@ -61,6 +164,7 @@ try {
         'id' => $rows[0]['id'],
         'name' => $rows[0]['name'],
         'sauce_type' => $rows[0]['sauce_type'],
+        'items' => []
     ];
 
     if ($recipe['sauce_type'] !== $sauce_type) {
@@ -68,7 +172,238 @@ try {
     }
 
 
-    $pdo->beginTransaction();
+
+    foreach ($rows as $row) {
+
+        if (!empty($row['flavour_name'])) {
+
+
+
+            $recipe['items'][] = [
+                'name' => $row['flavour_name'],
+                'percent' => (float) $row['percentage']
+            ];
+
+        }
+
+    }
+
+    if (empty($recipe['items'])) {
+        throw new Exception('Reseptdə heç bir material yoxdur');
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | SAUCE FIFO
+    |--------------------------------------------------------------------------
+    */
+
+    $stmt = $pdo->prepare("
+        SELECT
+            id,
+            stock,
+            price
+        FROM sauce_stock
+        WHERE type = ?
+        AND stock > 0
+        ORDER BY created_at ASC, id ASC
+        FOR UPDATE
+    ");
+
+    $stmt->execute([$sauce_type]);
+
+    $sauceStocks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    if (!$sauceStocks) {
+        throw new Exception('Hazır sous stokda yoxdur');
+    }
+
+    $totalSauceStock = array_sum(array_column($sauceStocks, 'stock'));
+
+    if ($totalSauceStock < $qty) {
+
+        throw new Exception(
+            'Hazır sous çatmır. Lazımdır: ' .
+            number_format($qty, 2) .
+            ' kq, Mövcuddur: ' .
+            number_format($totalSauceStock, 2) .
+            ' kq'
+        );
+
+    }
+
+    $remainingSauce = $qty;
+
+    foreach ($sauceStocks as $batch) {
+
+        if ($remainingSauce <= 0) {
+            break;
+        }
+
+        $used = min($batch['stock'], $remainingSauce);
+
+        $unitPrice = $batch['price'] / $batch['stock'];
+
+        $usedCost = round(
+            $unitPrice * $used,
+            4
+        );
+
+        $saucePlan[] = [
+            'id' => $batch['id'],
+            'used' => $used,
+            'used_cost' => $usedCost
+        ];
+
+        $cost += $usedCost;
+
+        $remainingSauce -= $used;
+    }
+
+    /*
+    |--------------------------------------------------------------------------
+    | FLAVOUR FIFO
+    |--------------------------------------------------------------------------
+    */
+
+
+
+    foreach ($recipe['items'] as $item) {
+
+        $materialName = $item['name'];
+
+        // Məsələn: 50kg * 3% = 1.5kg
+        $required = round(
+            $qty * ($item['percent'] / 100),
+            4
+        );
+
+        $stmt = $pdo->prepare("
+            SELECT
+                id,
+                stock,
+                price
+            FROM raw_materials
+            WHERE
+                type IN ('flavour', 'raw')
+                AND name=?
+                AND stock>0
+            ORDER BY in_stock ASC, id ASC
+            FOR UPDATE
+        ");
+
+        $stmt->execute([
+            $materialName
+        ]);
+
+        $stocks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (!$stocks) {
+
+            throw new Exception(
+                $materialName . ' stokda yoxdur'
+            );
+
+        }
+
+        $totalStock = array_sum(
+            array_column($stocks, 'stock')
+        );
+
+        if ($totalStock < $required) {
+
+            throw new Exception(
+                $materialName .
+                ' çatmır. Lazımdır: ' .
+                number_format($required, 4) .
+                ' kq, Mövcuddur: ' .
+                number_format($totalStock, 4) .
+                ' kq'
+            );
+
+        }
+
+        $remaining = $required;
+
+        foreach ($stocks as $batch) {
+
+            if ($remaining <= 0) {
+                break;
+            }
+
+            $used = min(
+                $batch['stock'],
+                $remaining
+            );
+
+            $unitPrice = $batch['price'] / $batch['stock'];
+
+            $usedCost = round(
+                $unitPrice * $used,
+                4
+            );
+
+            $materialPlan[] = [
+                'id' => $batch['id'],
+                'used' => $used,
+                'used_cost' => $usedCost
+            ];
+
+            $cost += $usedCost;
+
+            $remaining -= $used;
+        }
+
+    }
+
+
+    $updateSauce = $pdo->prepare("
+        UPDATE sauce_stock
+        SET
+            stock = stock - ?,
+            price = price - ?
+        WHERE id = ?
+    ");
+
+    foreach ($saucePlan as $row) {
+
+        $updateSauce->execute([
+            $row['used'],
+            $row['used_cost'],
+            $row['id']
+        ]);
+
+        if ($updateSauce->rowCount() !== 1) {
+            throw new Exception('Sous stokdan çıxarılmadı.');
+        }
+
+    }
+
+
+    $updateMaterial = $pdo->prepare("
+        UPDATE raw_materials
+        SET
+            stock = stock - ?,
+            price = price - ?
+        WHERE id = ?
+    ");
+
+    foreach ($materialPlan as $row) {
+
+        $updateMaterial->execute([
+            $row['used'],
+            $row['used_cost'],
+            $row['id']
+        ]);
+
+        if ($updateMaterial->rowCount() !== 1) {
+            throw new Exception('Material stokdan çıxarılmadı.');
+        }
+
+    }
+
+    $cost = round($cost, 4);
 
 
     $stmt = $pdo->prepare("
@@ -88,6 +423,62 @@ try {
         $cost,
         $fid
     ]);
+
+
+
+    $insertMaterialUsage = $pdo->prepare("
+    INSERT INTO sauce_flavour_material_usage
+(
+    sauce_flavour_id,
+    material_id,
+    qty,
+    cost
+)
+VALUES (?,?,?,?)
+    ");
+
+
+    foreach ($materialPlan as $row) {
+
+        $insertMaterialUsage->execute([
+            $fid,
+            $row['id'],
+            $row['used'],
+            $row['used_cost']
+        ]);
+
+        if ($insertMaterialUsage->rowCount() !== 1) {
+            throw new Exception('Material istifadəsi əlavə olunmadı.');
+        }
+
+    }
+
+
+    $insertSauceUsage = $pdo->prepare("
+        INSERT INTO sauce_flavour_sauce_usage
+            (
+                sauce_flavour_id,
+                sauce_stock_id,
+                qty,
+                cost
+            )
+            VALUES (?,?,?,?)
+    ");
+
+    foreach ($saucePlan as $row) {
+
+        $insertSauceUsage->execute([
+            $fid,
+            $row['id'],
+            $row['used'],
+            $row['used_cost']
+        ]);
+
+        if ($insertSauceUsage->rowCount() !== 1) {
+            throw new Exception('Sous istifadəsi əlavə olunmadı.');
+        }
+
+    }
 
     $pdo->commit();
 

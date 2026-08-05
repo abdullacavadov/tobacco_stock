@@ -115,43 +115,40 @@ foreach ($rows as $row) {
                         <div class="card-body">
                             <form id="edit_flavour">
 
-                            <input type="hidden" name="fid" value="<?= htmlspecialchars($_GET['fid']) ?>">
+                                <input type="hidden" name="fid" value="<?= htmlspecialchars($_GET['fid']) ?>">
 
 
                                 <div class="row">
 
                                     <div class="col-md-12 mb-3">
                                         <div class="form-floating">
-                                            <select class="form-control" id="recipe_id" name="recipe_id">
+                                
+                                            <strong>
+                                                <?= htmlspecialchars($sauceName) ?>
+                                                <span>
 
-                                                <?php foreach ($recipes as $recipe): ?>
-
-                                                    <option value="<?= htmlspecialchars($recipe['id']) ?>"
-                                                    <?php if ($sauceName == $recipe['name']) echo ' selected'; ?>
-                                                    >
-                                                        <?= htmlspecialchars($recipe['name']) ?>
-                                                        (<?php foreach ($recipe['items'] as $item): ?>
-
-                                                            <span>
+                                                    (<?php foreach ($recipes as $recipe): ?>
+                                                        <?php if ($sauceName == $recipe['name']): ?>
+                                                            <?php foreach ($recipe['items'] as $item): ?>
                                                                 <?= htmlspecialchars($item['flavour_name']) . ' - ' . number_format($item['percentage'], 2) . '%' ?>
+                                                            <?php endforeach; ?>
+                                                        <?php endif; ?>
+                                                    <?php endforeach; ?>)
+                                                </span>
+                                            </strong>
 
-                                                            </span>
+                                            <input type="hidden" name="recipe_id" value="<?= htmlspecialchars($recipe['id']) ?>">
 
-                                                        <?php endforeach; ?>)
-
-                                                    </option>
-
-                                                <?php endforeach; ?>
-                                            </select>
-                                            <label for="recipe_id">Dad</label>
                                         </div>
                                     </div>
 
                                     <div class="col-md-4">
                                         <div class="form-floating">
                                             <select class="form-control" id="sauce_type" name="sauce_type">
-                                                <option value="premium" <?php if ($sauceType == 'premium') echo ' selected'; ?>>Qırmızı</option>
-                                                <option value="strong" <?php if ($sauceType == 'strong') echo ' selected'; ?>>Qara</option>
+                                                <option value="premium" <?php if ($sauceType == 'premium')
+                                                    echo ' selected'; ?>>Qırmızı</option>
+                                                <option value="strong" <?php if ($sauceType == 'strong')
+                                                    echo ' selected'; ?>>Qara</option>
                                             </select>
                                             <label for="sauce_type">Növü</label>
                                         </div>
@@ -160,8 +157,9 @@ foreach ($rows as $row) {
 
                                     <div class="col-md-4">
                                         <div class="form-floating">
-                                            <input class="form-control" id="qty" name="qty" type="number"
-                                                step="0.0001" min="0.0001" placeholder="100 kq" value="<?= htmlspecialchars($sauceQty) ?>"/>
+                                            <input class="form-control" id="qty" name="qty" type="number" step="0.0001"
+                                                min="0.0001" placeholder="100 kq"
+                                                value="<?= htmlspecialchars($sauceQty) ?>" />
                                             <label for="qty">Həcm (kq)</label>
                                         </div>
                                     </div>
@@ -169,8 +167,8 @@ foreach ($rows as $row) {
 
                                     <div class="col-md-4">
                                         <div class="form-floating">
-                                            <input class="form-control" id="cost" name="cost" type="number"
-                                                step="0.0001" value="<?= number_format($sauceCost, 4, '.', '') ?>"/>
+                                            <input class="form-control" id="cost" name="cost" type="number" disabled
+                                                step="0.0001" value="<?= number_format($sauceCost, 4, '.', '') ?>" />
                                             <label for="cost">Ümumi həcmin qiyməti (AZN)</label>
                                         </div>
                                     </div>
@@ -270,7 +268,7 @@ foreach ($rows as $row) {
         });
     </script>
 
-    
+
 </body>
 
 </html>
