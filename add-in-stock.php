@@ -134,11 +134,22 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-6">
+                                    <div class="col-4">
                                         <div class="form-floating mb-3">
                                             <input class="form-control" id="price" type="number" name="price"
                                                 step="0.0001" min="0.0001" placeholder="100 ₼" />
                                             <label for="price">Ümumi qiymət (AZN)</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-2">
+                                        <div class="form-floating mb-3">
+                                            <select class="form-control" id="edv" name="edv">
+                                                <option value="">Yox</option>
+                                                <option value="0">0%</option>
+                                                <option value="18">18%</option>
+                                            </select>
+                                            <label for="edv">ƏDV</label>
                                         </div>
                                     </div>
 

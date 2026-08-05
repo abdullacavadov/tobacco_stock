@@ -9,6 +9,7 @@ if ($_POST['custom_name'] != '') {
 }
 $stock = (float) $_POST['stock'];
 $price = (float) $_POST['price'];
+$edv = trim($_POST['edv']);
 $type = trim($_POST['type']);
 $supplier = trim($_POST['supplier']);
 $description = trim($_POST['description']);
@@ -45,8 +46,8 @@ if ($type == 'raw') {
     $unit = 'əd';
 }
 
-$statement = $pdo->prepare("INSERT INTO raw_materials (name, type, stock, unit, price, supplier, description) VALUES (?,?,?,?,?,?,?)");
-$statement->execute([$name, $type, $stock, $unit, $price, $supplier, $description]);
+$statement = $pdo->prepare("INSERT INTO raw_materials (name, type, stock, edv, unit, price, supplier, description) VALUES (?,?,?,?,?,?,?,?)");
+$statement->execute([$name, $type, $stock, $edv, $unit, $price, $supplier, $description]);
 
 
 echo 'success';

@@ -14,6 +14,9 @@ $type = $raw_material['type'];
 $stock = $raw_material['stock'];
 $unit = $raw_material['unit'];
 $price = $raw_material['price'];
+$edv = $raw_material['edv'];
+$supplier = $raw_material['supplier'];
+$description = $raw_material['description'];
 ?>
 
 <!DOCTYPE html>
@@ -59,20 +62,29 @@ $price = $raw_material['price'];
                         <div class="card-body">
                             <form id="raw_edit">
 
-                            <input type="hidden" name="rid" value="<?= $rid; ?>">
+                                <input type="hidden" name="rid" value="<?= $rid; ?>">
 
                                 <div class="row mb-3">
-                                    <div class="col-12">
+                                    <div class="col-6">
 
                                         <div class="form-floating">
-                                            <input class="form-control" name="name" type="text"
-                                                placeholder="Xammal adı" value="<?= $name; ?>">
+                                            <input class="form-control" name="name" type="text" placeholder="Xammal adı"
+                                                value="<?= $name; ?>">
                                             <label for="nameInput">Məhsul adı</label>
                                         </div>
 
                                     </div>
 
-                                    
+
+                                    <div class="col-6">
+                                        <div class="form-floating">
+                                            <input class="form-control" id="supplier" name="supplier" type="text"
+                                                placeholder="Məs: ABC Qab" value="<?= $supplier; ?>" />
+                                            <label for="supplier">Təchizatçı</label>
+                                        </div>
+                                    </div>
+
+
 
                                 </div>
 
@@ -82,10 +94,12 @@ $price = $raw_material['price'];
 
                                         <div class="form-floating mb-3 mb-md-0">
                                             <select class="form-control" id="type" name="type">
-                                                <option value="raw" <?php echo ($type == 'raw') ? 'selected' : ''; ?>>Xammal</option>
+                                                <option value="raw" <?php echo ($type == 'raw') ? 'selected' : ''; ?>>
+                                                    Xammal</option>
                                                 <option value="flavour" <?php echo ($type == 'flavour') ? 'selected' : ''; ?>>Aroma</option>
                                                 <option value="package" <?php echo ($type == 'package') ? 'selected' : ''; ?>>Qab</option>
-                                                <option value="label" <?php echo ($type == 'label') ? 'selected' : ''; ?>>Etiket</option>
+                                                <option value="label" <?php echo ($type == 'label') ? 'selected' : ''; ?>>
+                                                    Etiket</option>
                                             </select>
                                             <label for="type">Növü</label>
                                         </div>
@@ -102,16 +116,41 @@ $price = $raw_material['price'];
                                     <div class="col-6">
                                         <div class="form-floating">
                                             <input class="form-control" id="stock" name="stock" type="number"
-                                                step="0.0001" min="0.0001" placeholder="100 kq" value="<?= $stock; ?>" />
+                                                step="0.0001" min="0.0001" placeholder="100 kq"
+                                                value="<?= $stock; ?>" />
                                             <label for="stock">Həcm (kq / əd)</label>
                                         </div>
                                     </div>
 
-                                    <div class="col-6">
+                                    <div class="col-4">
                                         <div class="form-floating mb-3">
                                             <input class="form-control" id="price" type="number" name="price"
                                                 step="0.0001" min="0.0001" value="<?= $price; ?>" />
                                             <label for="price">Ümumi həcmin qiyməti (AZN)</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-2">
+                                        <div class="form-floating mb-3">
+                                            <select class="form-control" id="edv" name="edv">
+                                                <option value="" <?php echo ($edv == '') ? 'selected' : ''; ?>>Yox
+                                                </option>
+                                                <option value="0" <?php echo ($edv == '0') ? 'selected' : ''; ?>>0%
+                                                </option>
+                                                <option value="18" <?php echo ($edv == '18') ? 'selected' : ''; ?>>18%
+                                                </option>
+                                            </select>
+                                            <label for="edv">ƏDV</label>
+                                        </div>
+                                    </div>
+
+
+
+                                    <div class="col-12">
+                                        <div class="form-floating mb-3">
+                                            <textarea class="form-control" id="description" name="description"
+                                                placeholder="Qeyd" rows="5"><?= $description; ?></textarea>
+                                            <label for="description">Qeyd</label>
                                         </div>
                                     </div>
                                 </div>
@@ -209,7 +248,7 @@ $price = $raw_material['price'];
     </script>
 
 
-   
+
 </body>
 
 </html>
