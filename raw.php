@@ -179,7 +179,25 @@ $products = $pdo
                                             </td>
 
                                             <td>
-                                                <?= number_format((float) $item['price'] / $item['stock'], 3, ',', ' '); ?> ₼
+                                                <?= number_format((float) $item['price'] / $item['stock'], 3, ',', ' '); ?>
+                                                ₼
+                                                <span>
+                                                    <small>
+                                                        <i>
+                                                            (ƏDV:
+                                                            <?php
+                                                            if ($item['edv'] == '18') {
+                                                                echo '+18% = ' . number_format((float) ($item['price'] / $item['stock']) * 1.18, 3, ',', ' ') . ' ₼';
+                                                            } elseif ($item['edv'] == '0') {
+                                                                echo '+0% =' . number_format((float) ($item['price'] / $item['stock']) * 0, 3, ',', ' ') . ' ₼';
+                                                            } else {
+                                                                echo 'yox';
+                                                            }
+                                                            ?>
+                                                            )
+                                                        </i>
+                                                    </small>
+                                                </span>
                                                 <br>
                                                 <small><b>(Cəmi: <?= number_format((float) $item['price'], 3, ',', ' '); ?>
                                                         ₼)</b></small>
