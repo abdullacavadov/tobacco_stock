@@ -189,7 +189,7 @@ $products = $pdo
                                                             if ($item['edv'] == '18') {
                                                                 echo '+18% = ' . number_format((float) ($item['price'] / $item['stock']) * 1.18, 3, ',', ' ') . ' ₼';
                                                             } elseif ($item['edv'] == '0') {
-                                                                echo '+0% =' . number_format((float) ($item['price'] / $item['stock']) * 0, 3, ',', ' ') . ' ₼';
+                                                                echo '+0% =' . number_format((float) ($item['price'] / $item['stock']), 3, ',', ' ') . ' ₼';
                                                             } else {
                                                                 echo 'yox';
                                                             }

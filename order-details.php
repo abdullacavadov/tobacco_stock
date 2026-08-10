@@ -10,10 +10,13 @@ if ($orderNo === '') {
 }
 
 $stmt = $pdo->prepare("
-    SELECT *
-    FROM orders
+    SELECT *,
+    rm.id AS raw_id,
+    rm.edv AS edv
+    FROM orders o
+    LEFT JOIN raw_materials rm ON o.item_id = rm.id
     WHERE order_no = ?
-    ORDER BY id ASC
+    ORDER BY o.id ASC
 ");
 
 $stmt->execute([$orderNo]);
@@ -98,6 +101,7 @@ $orderInfo = $orders[0];
                                     <?php $totalCost = 0;
                                     $totalRevenue = 0;
                                     $totalProfit = 0;
+                                    $totalEdv = 0;
                                     ?>
 
                                     <?php foreach ($orders as $order): ?>
@@ -111,6 +115,11 @@ $orderInfo = $orders[0];
                                         $totalCost += $cost;
                                         $totalRevenue += $revenue;
                                         $totalProfit += $profit;
+
+                                        // ƏDV faizi// Yalnız ƏDV 18% olduqda hesabla
+                                        if ((float) $order['edv'] === 18.0) {
+                                            $totalEdv += $cost * 18 / 100;
+                                        }
                                         ?>
 
                                         <?php
@@ -183,6 +192,20 @@ $orderInfo = $orders[0];
 
                                             <td>
                                                 <?= number_format(((float) $order['cost']), 4); ?> ₼
+                                                <br>
+                                                <small>
+                                                    (ƏDV:
+                                                    <?php
+                                                    if ($order['edv'] == '18') {
+                                                        echo '+18% = ' . number_format((float) ($order['cost']) * 1.18, 3, ',', ' ') . ' ₼';
+                                                    } elseif ($order['edv'] == '0') {
+                                                        echo '+0% =' . number_format((float) ($order['cost']), 3, ',', ' ') . ' ₼';
+                                                    } else {
+                                                        echo 'yox';
+                                                    }
+                                                    ?>
+                                                    )
+                                                </small>
                                             </td>
 
                                             <td>
@@ -212,6 +235,11 @@ $orderInfo = $orders[0];
                                 <strong>
                                     Cəmi maya dəyəri:
                                     <?= number_format((float) $totalCost, 3, ',', ' '); ?> ₼
+                                </strong>
+                                <br>
+                                <strong>
+                                    Cəmi ƏDV:
+                                    <?= number_format((float) $totalEdv, 3, ',', ' '); ?> ₼
                                 </strong>
                                 <br>
                                 <strong>
