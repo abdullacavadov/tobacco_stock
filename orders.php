@@ -73,7 +73,9 @@ $totalProfit = 0;
                                 Ümumi satışlar
                             </span>
 
-
+                            <button type="button" id="exportExcel" class="btn btn-success">
+                                <i class="fas fa-file-excel"></i> Yüklə
+                            </button>
 
 
 
@@ -221,6 +223,42 @@ $totalProfit = 0;
                     window.location.href = deleteUrl;
                 }
             });
+        });
+    </script>
+
+    <script>
+        document.getElementById('exportExcel').addEventListener('click', function () {
+
+            const table = document.getElementById('datatablesSimple');
+
+            let html = `
+        <html xmlns:x="urn:schemas-microsoft-com:office:excel">
+        <head>
+            <meta charset="UTF-8">
+        </head>
+        <body>
+            ${table.outerHTML}
+        </body>
+        </html>
+    `;
+
+            const blob = new Blob(
+                ['\ufeff' + html],
+                { type: 'application/vnd.ms-excel' }
+            );
+
+            const url = URL.createObjectURL(blob);
+
+            const link = document.createElement('a');
+
+            link.href = url;
+            link.download = 'satishlar - ' + new Date().toISOString().slice(0, 10) + '.xls';
+
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+
+            URL.revokeObjectURL(url);
         });
     </script>
 </body>
