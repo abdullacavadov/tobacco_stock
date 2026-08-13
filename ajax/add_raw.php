@@ -39,7 +39,7 @@ if ($type == 'raw') {
 } elseif ($type == 'flavour') {
     $unit = 'kq';
 } elseif ($type == 'package') {
-    $unit = 'əd';
+    $unit = 'kq';
 } elseif ($type == 'label') {
     $unit = 'əd';
 } elseif ($type == 'cover') {
